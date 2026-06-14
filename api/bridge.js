@@ -4,10 +4,23 @@ let tok = { v: null, exp: 0 };
 async function token() {
   if (tok.v && Date.now() < tok.exp) return tok.v;
   const r = await fetch(CS_BASE + '/oauth/v1/access-token', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ grant_type: 'client_credentials', client_id: process.env.CS_API_KEY, client_secret: process.env.CS_API_SECRET })
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json',
+      'Origin': 'https://ib.contasimples.com',
+      'Referer': 'https://ib.contasimples.com/'
+    },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      client_id: process.env.CS_API_KEY,
+      client_secret: process.env.CS_API_SECRET
+    })
   });
-  const d = await r.json();
+  const text = await r.text();
+  let d;
+  try { d = JSON.parse(text); } catch(e) { throw new Error('ContaSimples retornou HTML: ' + text.substring(0,200)); }
   if (!d.access_token) throw new Error('token falhou: ' + JSON.stringify(d));
   tok = { v: d.access_token, exp: Date.now() + 3400000 };
   return tok.v;
@@ -23,7 +36,7 @@ function cat(v) {
   return null;
 }
 
-async function txns(t) {
+async function getTxns(t) {
   const hoje = new Date();
   const y = hoje.getFullYear(), m = String(hoje.getMonth()+1).padStart(2,'0');
   const s = y+'-'+m+'-01', e = hoje.toISOString().split('T')[0];
@@ -31,8 +44,18 @@ async function txns(t) {
   do {
     let url = CS_BASE+'/statements/v1/banking?startDate='+s+'&endDate='+e+'&limit=50&sorting=transactionDate:ASC';
     if (nxt) url += '&nextPageStartKey=' + encodeURIComponent(nxt);
-    const r = await fetch(url, { headers: { Authorization: 'Bearer '+t } });
-    const d = await r.json();
+    const r = await fetch(url, {
+      headers: {
+        'Authorization': 'Bearer '+t,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://ib.contasimples.com',
+        'Referer': 'https://ib.contasimples.com/'
+      }
+    });
+    const text = await r.text();
+    let d;
+    try { d = JSON.parse(text); } catch(e) { throw new Error('txns retornou HTML: status=' + r.status + ' body=' + text.substring(0,200)); }
     all = all.concat((d.transactions||[]).filter(x => {
       const v = Math.abs(x.brlAmount);
       const tp = (x.transactionType&&x.transactionType.subType||'').toLowerCase();
@@ -46,7 +69,11 @@ async function txns(t) {
 
 function calc(all) {
   const hoje = new Date(), dh = hoje.getDate(), hs = hoje.toISOString().split('T')[0];
-  const m = { hoje:{sinal_19:0,sinal_24:0,aprov_60:0,aprov_65:0,aprov_70:0,total:0,count:0}, mes:{sinal_19:0,sinal_24:0,aprov_60:0,aprov_65:0,aprov_70:0,total:0,count:0}, porDia:{}, ultimosPix:[] };
+  const m = {
+    hoje:{sinal_19:0,sinal_24:0,aprov_60:0,aprov_65:0,aprov_70:0,total:0,count:0},
+    mes:{sinal_19:0,sinal_24:0,aprov_60:0,aprov_65:0,aprov_70:0,total:0,count:0},
+    porDia:{}, ultimosPix:[]
+  };
   all.forEach(x => {
     const v = Math.abs(x.brlAmount), c = cat(x.brlAmount); if (!c) return;
     const ds = x.transactionDate.split('T')[0], dia = parseInt(ds.split('-')[2]);
@@ -57,8 +84,10 @@ function calc(all) {
     if (m.ultimosPix.length<15) m.ultimosPix.unshift({valor:v,categoria:c,horario:x.transactionDate,descricao:x.sourceDestinationName||x.description||'PIX'});
   });
   m.ultimosPix.sort((a,b)=>new Date(b.horario)-new Date(a.horario));
-  m.hoje.sinais=m.hoje.sinal_19+m.hoje.sinal_24; m.hoje.aprovados=m.hoje.aprov_60+m.hoje.aprov_65+m.hoje.aprov_70;
-  m.mes.sinais=m.mes.sinal_19+m.mes.sinal_24; m.mes.aprovados=m.mes.aprov_60+m.mes.aprov_65+m.mes.aprov_70;
+  m.hoje.sinais=m.hoje.sinal_19+m.hoje.sinal_24;
+  m.hoje.aprovados=m.hoje.aprov_60+m.hoje.aprov_65+m.hoje.aprov_70;
+  m.mes.sinais=m.mes.sinal_19+m.mes.sinal_24;
+  m.mes.aprovados=m.mes.aprov_60+m.mes.aprov_65+m.mes.aprov_70;
   m.diasComFat=Object.keys(m.porDia).length;
   m.mediaDiaria=m.diasComFat>0?m.mes.total/m.diasComFat:0;
   m.meta=700; m.diaAtual=dh; m.timestamp=new Date().toISOString();
@@ -71,9 +100,10 @@ module.exports = async (req, res) => {
   if (req.method==='POST') return res.status(200).json({ok:true});
   try {
     const t = await token();
-    const all = await txns(t);
+    const all = await getTxns(t);
     res.status(200).json(calc(all));
   } catch(e) {
+    console.error(e.message);
     res.status(500).json({error: e.message});
   }
 };
