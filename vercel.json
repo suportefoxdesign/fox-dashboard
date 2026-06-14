@@ -1,1 +1,11 @@
-{}
+{
+  "functions": {
+    "api/bridge.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "routes": [
+    { "src": "/api/bridge", "dest": "/api/bridge.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
