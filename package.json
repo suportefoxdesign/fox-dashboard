@@ -1,0 +1,7 @@
+{
+    "name": "fox-dashboard",
+    "version": "1.0.0",
+    "description": "Fox Design - Dashboard Financeiro",
+    "private": true,
+    "engines": { "node": ">=18" }
+}
