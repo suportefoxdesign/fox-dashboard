@@ -89,7 +89,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,Bl
 <div class="hero-valor" id="hv">R$ 0,00</div>
 <div class="hero-status nok" id="hs">—</div>
 <div class="meta-bar-bg"><div class="meta-bar-fill" id="mf" style="width:0%"></div></div>
-<div class="meta-labels"><span class="meta-pct" id="mp">0%</span><span class="meta-ref">Meta R$ 700/dia</span></div>
+<div class="meta-labels"><span class="meta-pct" id="mp">0%</span><span class="meta-ref">Meta R$ 1.200/dia</span></div>
 </div>
 <div class="cards">
 <div class="c"><div class="c-lbl">Faturamento Mês</div><div class="c-val green" id="cfm">R$ 0</div><div class="c-sub">acumulado</div></div>
@@ -135,10 +135,10 @@ async function aN(){if('Notification' in window){const p=await Notification.requ
 function rHoje(d){
   const h=d.hoje,m=d.mes;
   const nSH=N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
-  const cH=nSH>0?Math.round(nAH/nSH*100):0,pct=Math.min(h.total/700*100,100);
+  const cH=nSH>0?Math.round(nAH/nSH*100):0,pct=Math.min(h.total/1200*100,100);
   S('hv',R(h.total));
   const st=document.getElementById('hs');
-  if(h.total>=700){st.textContent='✓ Meta atingida!';st.className='hero-status ok';}else{st.textContent='↓ '+R(700-h.total)+' abaixo da meta';st.className='hero-status nok';}
+  if(h.total>=1200){st.textContent='✓ Meta atingida!';st.className='hero-status ok';}else{st.textContent='↓ '+R(1200-h.total)+' abaixo da meta';st.className='hero-status nok';}
   document.getElementById('mf').style.width=pct+'%';document.getElementById('mf').className='meta-bar-fill'+(pct>=100?' ok':'');
   const pe=document.getElementById('mp');pe.textContent=Math.round(pct)+'%';pe.className='meta-pct'+(pct>=100?' ok':'');
   S('cfm',R(m.total));S('clm',R(d.lucroTotal||m.lucro||0));S('cth',R(m.trafego||0));S('cah',nAH);S('cas','conversão '+cH+'%');S('csh',nSH);
