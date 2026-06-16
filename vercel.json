@@ -1,6 +1,7 @@
 {
   "routes": [
     { "src": "/api/bridge", "dest": "/api/bridge.js" },
+    { "src": "/app/(.*)", "dest": "/app/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
