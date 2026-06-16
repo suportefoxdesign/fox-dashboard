@@ -118,7 +118,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <div class="err" id="err">&#9888; <span id="err-msg"></span></div>
   <!-- HOJE -->
   <div id="tab-hoje" class="tab on">
-    <div class="meta"><div class="meta-lbl">Meta R$700</div><div class="meta-track"><div class="meta-bar" id="mbar" style="width:0%"></div></div><div class="meta-pct" id="mpct">0%</div><div class="meta-div"></div><div class="meta-val" id="mval">R$0</div><div class="meta-lbl">hoje</div></div>
+    <div class="meta"><div class="meta-lbl">Meta R$1.200</div><div class="meta-track"><div class="meta-bar" id="mbar" style="width:0%"></div></div><div class="meta-pct" id="mpct">0%</div><div class="meta-div"></div><div class="meta-val" id="mval">R$0</div><div class="meta-lbl">hoje</div></div>
     <div class="kpis">
       <div class="kpi"><div class="kpi-l">Fat. Mês</div><div class="kpi-v p" id="k1">R$0</div><div class="kpi-s" id="k1s">0 dias</div></div>
       <div class="kpi"><div class="kpi-l">Aprovados Mês</div><div class="kpi-v g" id="k2">R$0</div><div class="kpi-s" id="k2s">0 aprov.</div></div>
@@ -247,7 +247,7 @@ function render(d){
   const nSH=N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
   const nSM=N(m.sinal_19/19.9)+N(m.sinal_24/24.9),nAM=N(m.aprov_60/60)+N(m.aprov_65/65)+N(m.aprov_70/70);
   const cM=nSM>0?Math.round(nAM/nSM*100):0,cH=nSH>0?Math.round(nAH/nSH*100):0;
-  const tk=nAM>0?m.aprovados/nAM:0,pct=Math.min(h.total/700*100,100);
+  const tk=nAM>0?m.aprovados/nAM:0,pct=Math.min(h.total/1200*100,100);
   document.getElementById('mbar').style.width=pct+'%';
   document.getElementById('mbar').className='meta-bar'+(pct>=100?' ok':'');
   const pe=document.getElementById('mpct');pe.textContent=pct.toFixed(0)+'%';pe.className='meta-pct'+(pct>=100?' ok':'');
@@ -261,8 +261,8 @@ function render(d){
   S('hdate',now.getDate().toString().padStart(2,'0')+'/'+now.toLocaleString('pt-BR',{month:'short'}).toUpperCase().replace('.','').slice(0,3)+' — FATURAMENTO HOJE');
   S('hval',R(h.total));
   const se=document.getElementById('hst');
-  if(h.total>=700){se.textContent='✓ Meta atingida';se.className='h-status ok';}
-  else{se.textContent='Faltam '+R(700-h.total)+' para a meta';se.className='h-status nok';}
+  if(h.total>=1200){se.textContent='✓ Meta atingida';se.className='h-status ok';}
+  else{se.textContent='Faltam '+R(1200-h.total)+' para a meta';se.className='h-status nok';}
   S('hs1',nSH);S('hs2',nAH);S('hs3',R(h.aprovados));
   S('f1',N(h.sinal_19/19.9));S('f2',N(h.sinal_24/24.9));S('f3',N(h.aprov_60/60));S('f4',N(h.aprov_65/65));S('f5',N(h.aprov_70/70));
   S('fs1',nSH);S('fs2',nAH);S('fs3',cH+'%');S('fs4',R(h.total));
