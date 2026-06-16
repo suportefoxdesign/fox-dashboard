@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Fox PIX 🦊</title>
+<style>
+:root{--bg:#0a0a12;--bg1:#0f0f1c;--bg2:#141425;--bg3:#1a1a30;--border:#1e1e35;--border2:#252545;--text:#f0f0ff;--muted:#5a5a8a;--purple:#7c5cfc;--purple2:#9b7ffe;--purple-dim:rgba(124,92,252,.12);--blue:#3d8eff;--blue2:#60a8ff;--green:#00d084;--green2:#00ff9d;--red:#ff4466}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;font-size:14px;min-height:100vh;padding-bottom:70px;max-width:480px;margin:0 auto}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;background:var(--bg1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50}
+.hdr-logo{font-size:18px;font-weight:900;letter-spacing:-1px}
+.hdr-logo span{color:var(--purple2)}
+.hdr-live{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.notif-banner{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;gap:12px}
+.notif-text strong{font-size:13px;color:var(--text);display:block;margin-bottom:2px}
+.notif-text span{font-size:11px;color:var(--muted)}
+.btn-notif{background:var(--purple);color:#fff;border:none;padding:8px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0}
+.hero-card{background:linear-gradient(160deg,#0f0f20,#0a1525);border-bottom:1px solid var(--border);padding:20px 16px 16px;position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:300px;height:300px;background:radial-gradient(circle,var(--purple-dim),transparent 70%);pointer-events:none}
+.hero-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;text-align:center;margin-bottom:8px}
+.hero-valor{font-size:48px;font-weight:900;color:var(--green2);text-align:center;letter-spacing:-2px;line-height:1;margin-bottom:6px;text-shadow:0 0 30px rgba(0,255,157,.3)}
+.hero-status{font-size:12px;text-align:center;margin-bottom:14px;font-weight:500}
+.hero-status.nok{color:var(--red)}.hero-status.ok{color:var(--green)}
+.meta-bar-bg{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.meta-bar-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:3px;transition:width .8s ease;min-width:3px}
+.meta-bar-fill.ok{background:linear-gradient(90deg,var(--green),var(--green2))}
+.meta-labels{display:flex;justify-content:space-between;margin-top:5px}
+.meta-pct{font-size:11px;font-weight:700;color:var(--purple2)}.meta-pct.ok{color:var(--green)}
+.meta-ref{font-size:11px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.c{background:var(--bg1);padding:14px 16px}
+.c-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:6px}
+.c-val{font-size:22px;font-weight:800;line-height:1;margin-bottom:3px}
+.c-val.green{color:var(--green)}.c-val.purple{color:var(--purple2)}.c-val.red{color:var(--red)}.c-val.white{color:var(--text)}
+.c-sub{font-size:11px;color:var(--muted)}
+.funil{background:var(--bg1);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 16px}
+.funil-title{font-size:10px;color:var(--purple2);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px}
+.funil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden}
+.funil-item{background:var(--bg2);padding:12px 8px;text-align:center}
+.funil-n{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
+.funil-n.blue{color:var(--blue2)}.funil-n.green{color:var(--green)}
+.funil-sub{font-size:9px;color:var(--muted);line-height:1.3}
+.funil-footer{margin-top:10px;font-size:11px;color:var(--muted);display:flex;flex-wrap:wrap;gap:8px}
+.funil-footer strong{color:var(--text)}.funil-footer .ul{color:var(--green);font-weight:600}
+.feed{padding:12px 16px}
+.feed-title{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:10px}
+.feed-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg1);border-radius:8px;border-left:3px solid var(--border2);margin-bottom:6px}
+.feed-item.s{border-left-color:var(--blue)}.feed-item.a{border-left-color:var(--purple)}
+.feed-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap}
+.ft-s{background:rgba(61,142,255,.15);color:var(--blue2)}.ft-a{background:rgba(124,92,252,.15);color:var(--purple2)}
+.feed-info{flex:1;min-width:0}
+.feed-desc{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.feed-hora{font-size:10px;color:var(--muted);margin-top:1px}
+.feed-val{font-size:13px;font-weight:700;color:var(--green);white-space:nowrap}
+.empty{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+.meses-list{padding:12px 16px}
+.mes-item{background:var(--bg1);border-radius:8px;border:1px solid var(--border);padding:14px 16px;margin-bottom:8px}
+.mes-nome{font-size:12px;font-weight:700;color:var(--purple2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.mes-vals{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mv-l{font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;text-align:center}
+.mv-n{font-size:14px;font-weight:700;text-align:center}
+.mv-n.g{color:var(--green)}.mv-n.p{color:var(--purple2)}.mv-n.r{color:var(--red)}
+.socios{padding:12px 16px}
+.socio-card{background:var(--bg1);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:10px;text-align:center}
+.socio-av{font-size:32px;margin-bottom:8px}
+.socio-nome{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px}
+.socio-val{font-size:32px;font-weight:900;color:var(--green);margin-bottom:4px}
+.socio-sub{font-size:11px;color:var(--muted)}
+.nav-bot{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--bg1);border-top:1px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 10px;cursor:pointer;color:var(--muted);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;border:none;background:none;transition:.15s}
+.nav-btn.on{color:var(--purple2)}
+.nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.section{display:none}.section.on{display:block}
+.err{background:rgba(255,68,102,.08);border-bottom:2px solid var(--red);padding:8px 16px;font-size:11px;color:var(--red);display:none}
+.sep{height:8px;background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+</style></head>
+<body>
+<div class="hdr"><div class="hdr-logo">FOX<span>PIX</span> 🦊</div><div class="hdr-live"><div class="dot"></div><span id="ut">ao vivo</span></div></div>
+<div class="err" id="err"><span id="em"></span></div>
+<div class="section on" id="s-hoje">
+<div class="notif-banner" id="nbanner"><div class="notif-text"><strong>Ativar notificações?</strong><span>Receba alerta quando cair PIX 🦊</span></div><button class="btn-notif" onclick="aN()">Ativar</button></div>
+<div class="hero-card">
+<div class="hero-label">Faturamento de hoje</div>
+<div class="hero-valor" id="hv">R$ 0,00</div>
+<div class="hero-status nok" id="hs">—</div>
+<div class="meta-bar-bg"><div class="meta-bar-fill" id="mf" style="width:0%"></div></div>
+<div class="meta-labels"><span class="meta-pct" id="mp">0%</span><span class="meta-ref">Meta R$ 700/dia</span></div>
+</div>
+<div class="cards">
+<div class="c"><div class="c-lbl">Faturamento Mês</div><div class="c-val green" id="cfm">R$ 0</div><div class="c-sub">acumulado</div></div>
+<div class="c"><div class="c-lbl">Lucro Mês</div><div class="c-val purple" id="clm">R$ 0</div><div class="c-sub">operacional</div></div>
+<div class="c"><div class="c-lbl">Tráfego Hoje</div><div class="c-val red" id="cth">R$ 0</div><div class="c-sub">Meta Ads</div></div>
+<div class="c"><div class="c-lbl">VS Ontem</div><div class="c-val white" id="cvo">—</div><div class="c-sub">diferença</div></div>
+<div class="c"><div class="c-lbl">Aprovados Hoje</div><div class="c-val green" id="cah">0</div><div class="c-sub" id="cas">conversão —</div></div>
+<div class="c"><div class="c-lbl">Fechados Hoje</div><div class="c-val white" id="csh">0</div><div class="c-sub">sinais</div></div>
+</div>
+<div class="sep"></div>
+<div class="funil">
+<div class="funil-title">Funil de Hoje</div>
+<div class="funil-grid">
+<div class="funil-item"><div class="funil-n blue" id="f19">0</div><div class="funil-sub">R$19,90<br>fechado</div></div>
+<div class="funil-item"><div class="funil-n blue" id="f24">0</div><div class="funil-sub">R$24,90<br>fechado</div></div>
+<div class="funil-item"><div class="funil-n green" id="f60">0</div><div class="funil-sub">R$60<br>aprovado</div></div>
+<div class="funil-item"><div class="funil-n green" id="f65">0</div><div class="funil-sub">R$65<br>aprovado</div></div>
+<div class="funil-item"><div class="funil-n green" id="f70">0</div><div class="funil-sub">R$70+<br>aprovado</div></div>
+<div class="funil-item" style="background:var(--bg)"><div class="funil-n" style="color:var(--muted);font-size:18px" id="fconv">0%</div><div class="funil-sub">conversão</div></div>
+</div>
+<div class="funil-footer"><span>Fechados: <strong id="ffs">0</strong></span><span>Aprovados: <strong id="ffa">0</strong></span><span>Conv: <strong id="ffc">0%</strong></span><span>Último: <span class="ul" id="ffu">—</span></span></div>
+</div>
+</div>
+<div class="section" id="s-feed"><div class="feed"><div class="feed-title">Últimas entradas</div><div id="fl"><div class="empty">Carregando...</div></div></div></div>
+<div class="section" id="s-dash"><div style="padding:32px 16px;text-align:center"><div style="font-size:48px;margin-bottom:16px">📊</div><div style="font-size:16px;font-weight:700;margin-bottom:8px">Dashboard Completo</div><div style="font-size:13px;color:var(--muted);margin-bottom:24px">Histórico, gastos e análise detalhada</div><a href="https://fox-dashboard-fox-design-s-projects.vercel.app" target="_blank" style="display:inline-block;background:var(--purple);color:#fff;padding:12px 28px;border-radius:24px;font-size:13px;font-weight:700;text-decoration:none">Abrir Dashboard →</a></div></div>
+<div class="section" id="s-meses"><div class="meses-list" id="ml"><div class="empty">Carregando...</div></div></div>
+<div class="section" id="s-socios"><div class="socios" id="sc"><div class="empty">Carregando...</div></div></div>
+<nav class="nav-bot">
+<button class="nav-btn on" onclick="gT('hoje',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>< /svg>Hoje</button>
+<button class="nav-btn" onclick="gT('feed',this)"><svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/>< /svg>Feed</button>
+<button class="nav-btn" onclick="gT('dash',this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>< /svg>Dashboard</button>
+<button class="nav-btn" onclick="gT('meses',this)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>< /svg>Meses</button>
+<button class="nav-btn" onclick="gT('socios',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>< /svg>Sócios</button>
+</nav>
+<script>
+const API='../api/bridge';let _d=null;
+const R=v=>'R$ '+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const N=v=>Math.round(v||0);
+const H=iso=>iso?new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'}):'—';
+const S=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+function gT(t,btn){document.querySelectorAll('.section').forEach(e=>e.classList.remove('on'));document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('on'));document.getElementById('s-'+t).classList.add('on');if(btn)btn.classList.add('on');if(_d){if(t==='feed')rFeed(_d);if(t==='meses')rMeses(_d);if(t==='socios')rSocios(_d);}}
+async function aN(){if('Notification' in window){const p=await Notification.requestPermission();if(p==='granted'){document.getElementById('nbanner').style.display='none';new Notification('🦊 Fox PIX ativado!',{body:'Você receberá alertas de PIX aqui.'});}}}
+function rHoje(d){
+  const h=d.hoje,m=d.mes;
+  const nSH=N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
+  const cH=nSH>0?Math.round(nAH/nSH*100):0,pct=Math.min(h.total/700*100,100);
+  S('hv',R(h.total));
+  const st=document.getElementById('hs');
+  if(h.total>=700){st.textContent='✓ Meta atingida!';st.className='hero-status ok';}else{st.textContent='↓ '+R(700-h.total)+' abaixo da meta';st.className='hero-status nok';}
+  document.getElementById('mf').style.width=pct+'%';document.getElementById('mf').className='meta-bar-fill'+(pct>=100?' ok':'');
+  const pe=document.getElementById('mp');pe.textContent=Math.round(pct)+'%';pe.className='meta-pct'+(pct>=100?' ok':'');
+  S('cfm',R(m.total));S('clm',R(d.lucroTotal||m.lucro||0));S('cth',R(m.trafego||0));S('cah',nAH);S('cas','conversão '+cH+'%');S('csh',nSH);
+  const ot=d.porDia[d.diaAtual-1];if(ot){const df=h.total-ot.total;const el=document.getElementById('cvo');el.textContent=(df>=0?'+':'')+R(df);el.className='c-val '+(df>=0?'green':'red');}
+  S('f19',N(h.sinal_19/19.9));S('f24',N(h.sinal_24/24.9));S('f60',N(h.aprov_60/60));S('f65',N(h.aprov_65/65));S('f70',N(h.aprov_70/70));S('fconv',cH+'%');
+  S('ffs',nSH);S('ffa',nAH);S('ffc',cH+'%');
+  if(d.ultimosPix&&d.ultimosPix[0])S('ffu',R(d.ultimosPix[0].valor)+' · '+H(d.ultimosPix[0].horario));
+}
+function rFeed(d){
+  const el=document.getElementById('fl');
+  if(!d.ultimosPix||!d.ultimosPix.length){el.innerHTML='<div class="empty">Nenhuma entrada hoje</div>';return;}
+  const LBL={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_65:'R$65',aprov_70:'R$70+'};
+  el.innerHTML=d.ultimosPix.slice(0,30).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';return`<div class="feed-item ${s?'s':'a'}"><span class="feed-tag ${s?'ft-s':'ft-a'}">${s?'SINAL':'APROV'}</span><div class="feed-info"><div class="feed-desc">${p.descricao||'PIX'} · ${LBL[p.categoria]||''}</div><div class="feed-hora">${H(p.horario)}</div></div><div class="feed-val">${R(p.valor)}</div></div>`;}).join('');
+}
+function rMeses(d){
+  const el=document.getElementById('ml');
+  if(!d.historico){el.innerHTML='<div class="empty">Sem dados</div>';return;}
+  const h=d.historico,ms=Object.keys(h).map(Number).sort((a,b)=>b-a);
+  el.innerHTML=ms.map(m=>{const v=h[m];const nS=N(v.sinais/19.9)||0,nA=N(v.aprovados/60)||0;const c=nS>0?Math.round(nA/nS*100):0;return`<div class="mes-item"><div class="mes-nome">${v.nome} 2026</div><div class="mes-vals"><div><div class="mv-l">Fat.</div><div class="mv-n g">${R(v.fat)}</div></div><div><div class="mv-l">Lucro</div><div class="mv-n ${(v.lucro||0)>=0?'p':'r'}">${R(v.lucro||0)}</div></div><div><div class="mv-l">Conv.</div><div class="mv-n p">${c}%</div></div></div></div>`;}).join('');
+}
+function rSocios(d){
+  const l=d.lucroTotal||d.mes?.lucro||0,p=d.lucroPett||l*.5,f=d.lucroFranca||l*.5;
+  let ac=0;if(d.historico)Object.values(d.historico).forEach(v=>ac+=v.lucro||0);
+  document.getElementById('sc').innerHTML=`<div class="socio-card"><div class="socio-av">🦊</div><div class="socio-nome">Pett</div><div class="socio-val">${R(p)}</div><div class="socio-sub">50% do lucro deste mês</div></div><div class="socio-card"><div class="socio-av">👨‍🎨</div><div class="socio-nome">França</div><div class="socio-val">${R(f)}</div><div class="socio-sub">50% do lucro deste mês</div></div><div class="mes-item"><div class="mes-nome">Acumulado 2026 — cada sócio</div><div style="text-align:center;font-size:28px;font-weight:900;color:var(--green);margin-top:8px">${R(ac*.5)}</div><div style="text-align:center;font-size:11px;color:var(--muted);margin-top:4px">total do ano por sócio</div></div>`;
+}
+async function load(){
+  try{const r=await fetch(API+'?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();if(data.error)throw new Error(data.error);_d=data;document.getElementById('err').style.display='none';rHoje(data);S('ut','ao vivo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));}
+  catch(e){document.getElementById('err').style.display='block';document.getElementById('em').textContent='⚠ '+e.message;}
+}
+load();setInterval(load,5*60*1000);
+let _lc=0;setInterval(async()=>{if(Notification.permission!=='granted')return;try{const r=await fetch(API+'?t='+Date.now());const data=await r.json();if(data.hoje&&data.hoje.count>_lc&&_lc>0)new Notification('🦊 PIX recebido!',{body:'Novo PIX na Fox Design'});_lc=data.hoje?.count||0;_d=data;rHoje(data);}catch(e){}},2*60*1000);
+</script></body></html>
