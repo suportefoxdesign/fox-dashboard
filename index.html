@@ -6,8 +6,17 @@
 <title>Fox Design — Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900');
-:root{--bg:#08080f;--bg1:#0d0d1a;--bg2:#12121f;--bg3:#181828;--border:#1e1e35;--border2:#252540;--text:#f0f0ff;--muted:#5a5a7a;--muted2:#2e2e4a;--purple:#7c5cfc;--purple2:#9b7ffe;--purple-dim:rgba(124,92,252,.1);--blue:#3d8eff;--blue2:#60a8ff;--blue-dim:rgba(61,142,255,.1);--white:#ffffff;--white-dim:rgba(255,255,255,.06);--green:#00d084;--green-dim:rgba(0,208,132,.08);--red:#ff4466}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{
+  --bg:#08080f;--bg1:#0d0d1a;--bg2:#12121f;--bg3:#181828;
+  --border:#1e1e35;--border2:#252540;
+  --text:#f0f0ff;--muted:#5a5a7a;--muted2:#2e2e4a;
+  --purple:#7c5cfc;--purple2:#9b7ffe;--purple-dim:rgba(124,92,252,.1);
+  --blue:#3d8eff;--blue2:#60a8ff;--blue-dim:rgba(61,142,255,.1);
+  --white:#ffffff;
+  --green:#00d084;--green-dim:rgba(0,208,132,.08);
+  --red:#ff4466;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;line-height:1.5;min-height:100vh}
 .hdr{display:flex;align-items:center;padding:0 24px;height:54px;background:var(--bg1);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
@@ -30,112 +39,210 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .meta-lbl{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 .meta-track{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden}
 .meta-bar{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.meta-bar.ok{background:var(--green)}.meta-pct{font-size:12px;font-weight:700;color:var(--purple2);font-family:'Inter',sans-serif;min-width:36px;text-align:right}
+.meta-bar.ok{background:var(--green)}.meta-pct{font-size:12px;font-weight:700;color:var(--purple2);min-width:36px;text-align:right}
 .meta-pct.ok{color:var(--green)}.meta-div{width:1px;height:18px;background:var(--border);margin:0 2px}
-.meta-val{font-size:17px;font-weight:800;color:var(--white);font-family:'Inter',sans-serif;letter-spacing:-.5px}
+.meta-val{font-size:17px;font-weight:800;color:var(--white)}
 .kpis{display:grid;grid-template-columns:repeat(9,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}
 .kpi{background:var(--bg1);padding:13px 14px;transition:background .15s}.kpi:hover{background:var(--bg2)}
 .kpi-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:7px}
-.kpi-v{font-size:16px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:-.3px;line-height:1;color:var(--text)}
+.kpi-v{font-size:16px;font-weight:700;letter-spacing:-.3px;line-height:1;color:var(--text)}
 .kpi-v.p{color:var(--purple2)}.kpi-v.b{color:var(--blue2)}.kpi-v.g{color:var(--green)}.kpi-v.w{color:var(--white)}
 .kpi-s{font-size:10px;color:var(--muted);margin-top:3px}
 .hero{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:14px;display:flex;align-items:flex-start;gap:40px;position:relative;overflow:hidden}
 .hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--purple) 0%,var(--blue) 40%,transparent 70%)}
 .hero::after{content:'';position:absolute;top:0;left:0;width:200px;height:100%;background:radial-gradient(ellipse at left center,var(--purple-dim) 0%,transparent 70%);pointer-events:none}
 .h-left{flex:1;position:relative}.h-eye{font-size:10px;color:var(--purple2);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:5px}
-.h-val{font-size:52px;font-weight:900;color:var(--white);font-family:'Inter',sans-serif;letter-spacing:-2.5px;line-height:1;margin-bottom:7px}
+.h-val{font-size:52px;font-weight:900;color:var(--white);letter-spacing:-2.5px;line-height:1;margin-bottom:7px}
 .h-status{font-size:12px;font-weight:500;color:var(--muted)}.h-status.ok{color:var(--green)}.h-status.nok{color:var(--muted)}
 .h-right{display:flex;gap:36px;position:relative}
 .h-stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:4px}
-.h-stat-v{font-size:22px;font-weight:700;font-family:'Inter',sans-serif}
-.h-stat-v.b{color:var(--blue2)}.h-stat-v.g{color:var(--green)}.h-stat-v.p{color:var(--purple2)}
+.h-stat-v{font-size:22px;font-weight:700}.h-stat-v.b{color:var(--blue2)}.h-stat-v.g{color:var(--green)}.h-stat-v.p{color:var(--purple2)}
 .h-stat-s{font-size:10px;color:var(--muted);margin-top:2px}
 .funil{background:var(--bg1);border:1px solid var(--border);border-left:2px solid var(--purple);border-radius:8px;padding:14px 20px;margin-bottom:14px}
 .s-title{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:12px}
 .f-cells{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:10px}
 .f-cell{background:var(--bg);padding:14px 10px;text-align:center}
-.f-n{font-size:30px;font-weight:800;font-family:'Inter',sans-serif;line-height:1;margin-bottom:5px}
-.f-n.b{color:var(--blue2)}.f-n.g{color:var(--green)}.f-l{font-size:10px;color:var(--muted);line-height:1.3}
+.f-n{font-size:30px;font-weight:800;line-height:1;margin-bottom:5px}.f-n.b{color:var(--blue2)}.f-n.g{color:var(--green)}
+.f-l{font-size:10px;color:var(--muted);line-height:1.3}
 .f-foot{display:flex;gap:20px;font-size:11px;color:var(--muted);font-weight:500}.f-foot strong{color:var(--text)}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
 .card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px 18px}
 .m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .m-l{font-size:9px;color:var(--muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
-.m-v{font-size:15px;font-weight:700;font-family:'Inter',sans-serif}
-.m-v.b{color:var(--blue2)}.m-v.g{color:var(--green)}.m-s{font-size:10px;color:var(--muted2);margin-top:2px}
+.m-v{font-size:15px;font-weight:700}.m-v.b{color:var(--blue2)}.m-v.g{color:var(--green)}.m-s{font-size:10px;color:var(--muted2);margin-top:2px}
 .pix-list{display:flex;flex-direction:column;gap:4px;max-height:260px;overflow-y:auto}
 .pix-list::-webkit-scrollbar{width:3px}.pix-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
-.px{display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--bg);border-radius:5px;border-left:2px solid var(--border2);animation:si .2s ease}
-@keyframes si{from{opacity:0;transform:translateX(-5px)}}
+.px{display:flex;align-items:center;gap:8px;padding:6px 9px;background:var(--bg);border-radius:5px;border-left:2px solid var(--border2)}
 .px.s{border-left-color:var(--blue)}.px.a{border-left-color:var(--purple)}
 .px-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap}
 .ts{background:var(--blue-dim);color:var(--blue2)}.ta{background:var(--purple-dim);color:var(--purple2)}
 .px-d{flex:1;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.px-h{font-size:10px;color:var(--muted2);white-space:nowrap;font-family:'Inter',sans-serif}
-.px-v{font-size:12px;font-weight:700;color:var(--green);white-space:nowrap;font-family:'Inter',sans-serif}
+.px-h{font-size:10px;color:var(--muted2);white-space:nowrap}.px-v{font-size:12px;font-weight:700;color:var(--green);white-space:nowrap}
 .empty{color:var(--muted2);font-size:12px;text-align:center;padding:20px}
 .chart-card{background:var(--bg1);border:1px solid var(--border);border-radius:8px;padding:14px 18px;margin-bottom:14px}
 .chart-wrap{height:150px;position:relative}
+.tab{display:none}.tab.on{display:block}
+.hist-grid{overflow-x:auto}
+.hist-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr 80px 1fr 1fr;gap:1px;background:var(--border);margin-bottom:1px;border-radius:2px;overflow:hidden}
+.hist-row>div{background:var(--bg);padding:8px 12px;font-size:12px}
+.hist-hdr>div{background:var(--bg2);font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.gasto-row{display:flex;justify-content:space-between;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.gasto-row:last-child{border-bottom:none}
+.gasto-lbl{font-size:12px;color:var(--text);font-weight:500}.gasto-nota{font-size:10px;color:var(--muted);margin-top:2px}.gasto-val{font-size:13px;font-weight:700;color:var(--red);white-space:nowrap}
+.res-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--border)}
+.res-row:last-child{border-bottom:none}
+.res-lbl{font-size:12px;color:var(--muted)}.res-val{font-size:13px;font-weight:700}
+.res-val.g{color:var(--green)}.res-val.r{color:var(--red)}.res-val.p{color:var(--purple2)}.res-val.w{color:var(--white)}
+.lucro-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.lucro-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center}
+.lucro-nome{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:10px}
+.lucro-val{font-size:36px;font-weight:900;color:var(--green);margin-bottom:4px}
+.lucro-sub{font-size:11px;color:var(--muted)}
+.acum-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.acum-row:last-child{border-bottom:none}
+.acum-mes{font-size:12px;color:var(--text);font-weight:500}
+.acum-cada{font-size:13px;font-weight:700}
 </style></head>
 <body>
 <div class="hdr">
   <div class="logo"><div class="logo-box">🦊</div><div><div class="logo-name">Fox Design</div><div class="logo-sub">Junho 2026</div></div></div>
-  <nav class="nav"><div class="nav-item on">Hoje</div><div class="nav-item">Histórico</div></nav>
-  <div class="hdr-right"><div class="live"><div class="dot"></div><span id="upd">—</span></div><button class="btn" onclick="load()">↻ Atualizar</button></div>
+  <nav class="nav">
+    <div class="nav-item on" onclick="showTab('hoje',this)">Hoje</div>
+    <div class="nav-item" onclick="showTab('historico',this)">Histórico</div>
+    <div class="nav-item" onclick="showTab('gastos',this)">Gastos</div>
+    <div class="nav-item" onclick="showTab('lucros',this)">Lucros</div>
+  </nav>
+  <div class="hdr-right"><div class="live"><div class="dot"></div><span id="upd">—</span></div><button class="btn" onclick="load()">&#x21BB; Atualizar</button></div>
 </div>
 <div class="main">
-  <div class="err" id="err">⚠ <span id="err-msg"></span></div>
-  <div class="meta"><div class="meta-lbl">Meta R$700</div><div class="meta-track"><div class="meta-bar" id="mbar" style="width:0%"></div></div><div class="meta-pct" id="mpct">0%</div><div class="meta-div"></div><div class="meta-val" id="mval">R$0</div><div class="meta-lbl">hoje</div></div>
-  <div class="kpis">
-    <div class="kpi"><div class="kpi-l">Fat. Mês</div><div class="kpi-v p" id="k1">R$0</div><div class="kpi-s" id="k1s">0 dias</div></div>
-    <div class="kpi"><div class="kpi-l">Aprovados Mês</div><div class="kpi-v g" id="k2">R$0</div><div class="kpi-s" id="k2s">0 aprov.</div></div>
-    <div class="kpi"><div class="kpi-l">Sinais Mês</div><div class="kpi-v b" id="k3">R$0</div><div class="kpi-s" id="k3s">0 sinais</div></div>
-    <div class="kpi"><div class="kpi-l">Conversão Mês</div><div class="kpi-v" id="k4">0%</div><div class="kpi-s" id="k4s">—</div></div>
-    <div class="kpi"><div class="kpi-l">Ticket Médio</div><div class="kpi-v" id="k5">R$0</div><div class="kpi-s">por aprovado</div></div>
-    <div class="kpi"><div class="kpi-l">Média Diária</div><div class="kpi-v" id="k6">R$0</div><div class="kpi-s" id="k6s">—</div></div>
-    <div class="kpi"><div class="kpi-l">PIX Hoje</div><div class="kpi-v w" id="k7">0</div><div class="kpi-s">entradas</div></div>
-    <div class="kpi"><div class="kpi-l">Conv. Hoje</div><div class="kpi-v" id="k8">0%</div><div class="kpi-s" id="k8s">—</div></div>
-    <div class="kpi"><div class="kpi-l">Último PIX</div><div class="kpi-v g" id="k9">—</div><div class="kpi-s" id="k9s">—</div></div>
-  </div>
-  <div class="hero">
-    <div class="h-left"><div class="h-eye" id="hdate">15/JUN — FATURAMENTO HOJE</div><div class="h-val" id="hval">R$0,00</div><div class="h-status nok" id="hst">Carregando...</div></div>
-    <div class="h-right">
-      <div><div class="h-stat-l">Sinais Hoje</div><div class="h-stat-v b" id="hs1">0</div><div class="h-stat-s">19,90 · 24,90</div></div>
-      <div><div class="h-stat-l">Aprovados Hoje</div><div class="h-stat-v g" id="hs2">0</div><div class="h-stat-s">60 · 65 · 70+</div></div>
-      <div><div class="h-stat-l">Receita Aprovados</div><div class="h-stat-v p" id="hs3">R$0</div><div class="h-stat-s">receita fechada</div></div>
+  <div class="err" id="err">&#9888; <span id="err-msg"></span></div>
+  <!-- HOJE -->
+  <div id="tab-hoje" class="tab on">
+    <div class="meta"><div class="meta-lbl">Meta R$700</div><div class="meta-track"><div class="meta-bar" id="mbar" style="width:0%"></div></div><div class="meta-pct" id="mpct">0%</div><div class="meta-div"></div><div class="meta-val" id="mval">R$0</div><div class="meta-lbl">hoje</div></div>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-l">Fat. Mês</div><div class="kpi-v p" id="k1">R$0</div><div class="kpi-s" id="k1s">0 dias</div></div>
+      <div class="kpi"><div class="kpi-l">Aprovados Mês</div><div class="kpi-v g" id="k2">R$0</div><div class="kpi-s" id="k2s">0 aprov.</div></div>
+      <div class="kpi"><div class="kpi-l">Sinais Mês</div><div class="kpi-v b" id="k3">R$0</div><div class="kpi-s" id="k3s">0 sinais</div></div>
+      <div class="kpi"><div class="kpi-l">Conversão Mês</div><div class="kpi-v" id="k4">0%</div><div class="kpi-s" id="k4s">—</div></div>
+      <div class="kpi"><div class="kpi-l">Ticket Médio</div><div class="kpi-v" id="k5">R$0</div><div class="kpi-s">por aprovado</div></div>
+      <div class="kpi"><div class="kpi-l">Média Diária</div><div class="kpi-v" id="k6">R$0</div><div class="kpi-s" id="k6s">—</div></div>
+      <div class="kpi"><div class="kpi-l">PIX Hoje</div><div class="kpi-v w" id="k7">0</div><div class="kpi-s">entradas</div></div>
+      <div class="kpi"><div class="kpi-l">Conv. Hoje</div><div class="kpi-v" id="k8">0%</div><div class="kpi-s" id="k8s">—</div></div>
+      <div class="kpi"><div class="kpi-l">Último PIX</div><div class="kpi-v g" id="k9">—</div><div class="kpi-s" id="k9s">—</div></div>
+    </div>
+    <div class="hero">
+      <div class="h-left"><div class="h-eye" id="hdate">HOJE — FATURAMENTO</div><div class="h-val" id="hval">R$0,00</div><div class="h-status nok" id="hst">Carregando...</div></div>
+      <div class="h-right">
+        <div><div class="h-stat-l">Sinais Hoje</div><div class="h-stat-v b" id="hs1">0</div><div class="h-stat-s">19,90 · 24,90</div></div>
+        <div><div class="h-stat-l">Aprovados Hoje</div><div class="h-stat-v g" id="hs2">0</div><div class="h-stat-s">60 · 65 · 70+</div></div>
+        <div><div class="h-stat-l">Receita Aprovados</div><div class="h-stat-v p" id="hs3">R$0</div><div class="h-stat-s">receita fechada</div></div>
+      </div>
+    </div>
+    <div class="funil">
+      <div class="s-title">Funil do Dia</div>
+      <div class="f-cells">
+        <div class="f-cell"><div class="f-n b" id="f1">0</div><div class="f-l">R$19,90<br>fechados</div></div>
+        <div class="f-cell"><div class="f-n b" id="f2">0</div><div class="f-l">R$24,90<br>fechados</div></div>
+        <div class="f-cell"><div class="f-n g" id="f3">0</div><div class="f-l">R$60<br>aprovados</div></div>
+        <div class="f-cell"><div class="f-n g" id="f4">0</div><div class="f-l">R$65<br>aprovados</div></div>
+        <div class="f-cell"><div class="f-n g" id="f5">0</div><div class="f-l">R$70+<br>aprovados</div></div>
+      </div>
+      <div class="f-foot"><span>Sinais: <strong id="fs1">0</strong></span><span>Aprovados: <strong id="fs2">0</strong></span><span>Conversão: <strong id="fs3">0%</strong></span><span>Faturamento: <strong id="fs4">R$0</strong></span></div>
+    </div>
+    <div class="chart-card"><div class="s-title">Faturamento por dia — Junho</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
+    <div class="cols">
+      <div class="card"><div class="s-title">Resumo do Mês</div><div class="m-grid">
+        <div><div class="m-l">19,90 fechados</div><div class="m-v b" id="m1">0</div><div class="m-s" id="m1r">R$0</div></div>
+        <div><div class="m-l">24,90 fechados</div><div class="m-v b" id="m2">0</div><div class="m-s" id="m2r">R$0</div></div>
+        <div><div class="m-l">Total sinais</div><div class="m-v b" id="m3">0</div><div class="m-s" id="m3r">R$0</div></div>
+        <div><div class="m-l">60 aprovados</div><div class="m-v g" id="m4">0</div><div class="m-s" id="m4r">R$0</div></div>
+        <div><div class="m-l">65 aprovados</div><div class="m-v g" id="m5">0</div><div class="m-s" id="m5r">R$0</div></div>
+        <div><div class="m-l">70+ aprovados</div><div class="m-v g" id="m6">0</div><div class="m-s" id="m6r">R$0</div></div>
+      </div></div>
+      <div class="card"><div class="s-title">Últimas entradas</div><div class="pix-list" id="plist"><div class="empty">Carregando...</div></div></div>
     </div>
   </div>
-  <div class="funil">
-    <div class="s-title">Funil do Dia</div>
-    <div class="f-cells">
-      <div class="f-cell"><div class="f-n b" id="f1">0</div><div class="f-l">R$19,90<br>fechados</div></div>
-      <div class="f-cell"><div class="f-n b" id="f2">0</div><div class="f-l">R$24,90<br>fechados</div></div>
-      <div class="f-cell"><div class="f-n g" id="f3">0</div><div class="f-l">R$60<br>aprovados</div></div>
-      <div class="f-cell"><div class="f-n g" id="f4">0</div><div class="f-l">R$65<br>aprovados</div></div>
-      <div class="f-cell"><div class="f-n g" id="f5">0</div><div class="f-l">R$70+<br>aprovados</div></div>
-    </div>
-    <div class="f-foot"><span>Sinais: <strong id="fs1">0</strong></span><span>Aprovados: <strong id="fs2">0</strong></span><span>Conversão: <strong id="fs3">0%</strong></span><span>Faturamento: <strong id="fs4">R$0</strong></span></div>
+  <!-- HISTÓRICO -->
+  <div id="tab-historico" class="tab">
+    <div class="card" style="margin-bottom:14px"><div class="s-title">Histórico Mensal — 2026</div><div class="hist-grid" id="hist-table"></div></div>
+    <div class="chart-card"><div class="s-title">Faturamento e Lucro por Mês</div><div class="chart-wrap"><canvas id="chart-hist"></canvas></div></div>
   </div>
-  <div class="chart-card"><div class="s-title">Faturamento por dia — Junho</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
-  <div class="cols">
-    <div class="card"><div class="s-title">Resumo do Mês</div><div class="m-grid">
-      <div><div class="m-l">19,90 fechados</div><div class="m-v b" id="m1">0</div><div class="m-s" id="m1r">R$0</div></div>
-      <div><div class="m-l">24,90 fechados</div><div class="m-v b" id="m2">0</div><div class="m-s" id="m2r">R$0</div></div>
-      <div><div class="m-l">Total sinais</div><div class="m-v b" id="m3">0</div><div class="m-s" id="m3r">R$0</div></div>
-      <div><div class="m-l">60 aprovados</div><div class="m-v g" id="m4">0</div><div class="m-s" id="m4r">R$0</div></div>
-      <div><div class="m-l">65 aprovados</div><div class="m-v g" id="m5">0</div><div class="m-s" id="m5r">R$0</div></div>
-      <div><div class="m-l">70+ aprovados</div><div class="m-v g" id="m6">0</div><div class="m-s" id="m6r">R$0</div></div>
-    </div></div>
-    <div class="card"><div class="s-title">Últimas entradas</div><div class="pix-list" id="plist"><div class="empty">Carregando...</div></div></div>
+  <!-- GASTOS -->
+  <div id="tab-gastos" class="tab">
+    <div class="cols">
+      <div class="card"><div class="s-title">Gastos — Junho 2026</div><div id="gastos-lista"></div></div>
+      <div class="card"><div class="s-title">Resumo Financeiro</div><div id="gastos-resumo"></div></div>
+    </div>
+  </div>
+  <!-- LUCROS -->
+  <div id="tab-lucros" class="tab">
+    <div class="lucro-split" id="lucro-split"></div>
+    <div class="cols">
+      <div class="card"><div class="s-title">Acumulado por Mês</div><div id="lucro-acum"></div></div>
+      <div class="chart-card" style="margin-bottom:0"><div class="s-title">Lucro por Sócio / Mês</div><div class="chart-wrap"><canvas id="chart-lucro"></canvas></div></div>
+    </div>
   </div>
 </div>
 <script>
-const API='/api/bridge';let ch=null;
+const API='/api/bridge';
+let ch=null,chHist=null,chLucro=null,_data=null;
 const R=v=>'R$'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const N=v=>Math.round(v||0);
 const H=iso=>iso?new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'}):'—';
 const S=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+function showTab(tab,el){
+  document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('tab-'+tab).classList.add('on');
+  if(_data&&tab!=='hoje')renderExtra(tab,_data);
+}
+function renderExtra(tab,d){
+  if(tab==='historico')renderHistorico(d);
+  if(tab==='gastos')renderGastos(d);
+  if(tab==='lucros')renderLucros(d);
+}
+function renderHistorico(d){
+  if(!d.historico)return;
+  const h=d.historico,meses=Object.keys(h).map(Number).sort((a,b)=>a-b);
+  let html='<div class="hist-row hist-hdr"><div>Mês</div><div>Faturamento</div><div>Sinais</div><div>Aprovados</div><div>Conv.</div><div>Tráfego</div><div>Lucro</div></div>';
+  let totF=0,totL=0,totT=0;
+  for(const m of meses){
+    const v=h[m];
+    const nS=N(v.sinais/19.9)||0,nA=N(v.aprovados/60)||0;
+    const conv=nS>0?Math.round(nA/nS*100)+'%':'—';
+    totF+=v.fat||0;totL+=v.lucro||0;totT+=v.trafego||0;
+    const lc=v.lucro>=0?'var(--green)':'var(--red)';
+    html+=`<div class="hist-row"><div style="font-weight:600;color:var(--purple2)">${v.nome}</div><div style="color:var(--green)">${R(v.fat)}</div><div style="color:var(--blue2)">${R(v.sinais)}</div><div style="color:var(--purple2)">${R(v.aprovados)}</div><div>${conv}</div><div style="color:var(--red)">-${R(v.trafego)}</div><div style="color:${lc};font-weight:700">${R(v.lucro)}</div></div>`;
+  }
+  html+=`<div class="hist-row" style="background:var(--bg2)"><div style="font-weight:800;color:var(--white)">TOTAL</div><div style="color:var(--green);font-weight:700">${R(totF)}</div><div></div><div></div><div></div><div style="color:var(--red);font-weight:700">-${R(totT)}</div><div style="color:var(--green);font-weight:700">${R(totL)}</div></div>`;
+  document.getElementById('hist-table').innerHTML=html;
+  const ctx=document.getElementById('chart-hist').getContext('2d');
+  if(chHist)chHist.destroy();
+  chHist=new Chart(ctx,{type:'bar',data:{labels:meses.map(m=>h[m].nome.slice(0,3)),datasets:[{label:'Faturamento',data:meses.map(m=>h[m].fat||0),backgroundColor:'rgba(124,92,252,.5)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:4},{label:'Lucro',data:meses.map(m=>h[m].lucro||0),backgroundColor:'rgba(0,208,132,.5)',borderColor:'#00d084',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10},boxWidth:8,padding:12}}},scales:{x:{ticks:{color:'#2e2e4a',font:{size:10}},grid:{color:'#0d0d1a'}},y:{ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
+}
+function renderGastos(d){
+  const m=d.mes||{};
+  const traf=m.trafego||0,saida=m.saida||0,desp=m.despesas||0;
+  const total=traf+saida+desp,fat=m.total||0,luc=fat-total;
+  document.getElementById('gastos-lista').innerHTML=`<div class="gasto-row"><div><div class="gasto-lbl">Tráfego (Meta Ads)</div><div class="gasto-nota">Investimento diário em anúncios</div></div><div class="gasto-val">-${R(traf)}</div></div><div class="gasto-row"><div><div class="gasto-lbl">Outras Saídas</div><div class="gasto-nota">Saídas variáveis registradas</div></div><div class="gasto-val">-${R(saida)}</div></div><div class="gasto-row"><div><div class="gasto-lbl">Despesas Mensais</div><div class="gasto-nota">Ferramentas e plataformas</div></div><div class="gasto-val">-${R(desp)}</div></div><div class="gasto-row" style="margin-top:6px;padding-top:12px;border-top:1px solid var(--purple)"><div><div class="gasto-lbl" style="font-weight:700;color:var(--white)">Total Gastos</div></div><div class="gasto-val" style="font-size:16px">-${R(total)}</div></div>`;
+  document.getElementById('gastos-resumo').innerHTML=`<div class="res-row"><div class="res-lbl">Faturamento Bruto</div><div class="res-val g">${R(fat)}</div></div><div class="res-row"><div class="res-lbl">Total Gastos</div><div class="res-val r">-${R(total)}</div></div><div class="res-row"><div class="res-lbl">Lucro Operacional</div><div class="res-val ${luc>=0?'g':'r'}">${R(luc)}</div></div><div class="res-row"><div class="res-lbl">Margem Líquida</div><div class="res-val p">${fat>0?Math.round(luc/fat*100):0}%</div></div>`;
+}
+function renderLucros(d){
+  const luc=d.lucroTotal||0,p=d.lucroPett||0,f=d.lucroFranca||0;
+  document.getElementById('lucro-split').innerHTML=`<div class="lucro-card"><div class="lucro-nome">&#x1F98A; Pett</div><div class="lucro-val">${R(p)}</div><div class="lucro-sub">50% · lucro ${R(luc)}</div></div><div class="lucro-card"><div class="lucro-nome">&#x1F468;&#x200D;&#x1F3A8; França</div><div class="lucro-val">${R(f)}</div><div class="lucro-sub">50% · lucro ${R(luc)}</div></div>`;
+  if(!d.historico)return;
+  const h=d.historico,meses=Object.keys(h).map(Number).sort((a,b)=>a-b);
+  let totAcum=0;
+  let acHtml=meses.map(m=>{const v=h[m];totAcum+=v.lucro||0;const cada=(v.lucro||0)*.5;return`<div class="acum-row"><div class="acum-mes">${v.nome}</div><div><div style="font-size:10px;color:var(--muted)">Lucro: ${R(v.lucro||0)}</div><div class="acum-cada" style="color:${cada>=0?'var(--green)':'var(--red)'}">${R(cada)} cada</div></div></div>`;}).join('');
+  acHtml+=`<div class="acum-row" style="border-top:1px solid var(--purple);margin-top:4px"><div class="acum-mes" style="font-weight:700;color:var(--white)">Total 2026</div><div><div class="acum-cada" style="color:var(--green);font-size:16px;font-weight:800">${R(totAcum*.5)} cada</div></div></div>`;
+  document.getElementById('lucro-acum').innerHTML=acHtml;
+  const ctx=document.getElementById('chart-lucro').getContext('2d');
+  if(chLucro)chLucro.destroy();
+  chLucro=new Chart(ctx,{type:'bar',data:{labels:meses.map(m=>h[m].nome.slice(0,3)),datasets:[{label:'Pett (50%)',data:meses.map(m=>(h[m].lucro||0)*.5),backgroundColor:'rgba(124,92,252,.6)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:4},{label:'França (50%)',data:meses.map(m=>(h[m].lucro||0)*.5),backgroundColor:'rgba(61,142,255,.5)',borderColor:'#3d8eff',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10},boxWidth:8}}},scales:{x:{ticks:{color:'#2e2e4a',font:{size:10}},grid:{color:'#0d0d1a'}},y:{ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
+}
 function render(d){
+  _data=d;
   const h=d.hoje,m=d.mes;
   const nSH=N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
   const nSM=N(m.sinal_19/19.9)+N(m.sinal_24/24.9),nAM=N(m.aprov_60/60)+N(m.aprov_65/65)+N(m.aprov_70/70);
@@ -165,12 +272,12 @@ function render(d){
   const pl=document.getElementById('plist');
   const LBL={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_65:'R$65',aprov_70:'R$70+'};
   if(!d.ultimosPix?.length){pl.innerHTML='<div class="empty">Nenhum PIX hoje</div>';}
-  else pl.innerHTML=d.ultimosPix.slice(0,12).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';return'<div class="px '+(s?'s':'a')+'"><span class="px-tag '+(s?'ts':'ta')+'">'+(s?'SINAL':'APROV')+'</span><span class="px-d">'+(p.descricao||'PIX')+' · '+(LBL[p.categoria]||'')+'</span><span class="px-h">'+H(p.horario)+'</span><span class="px-v">'+R(p.valor)+'</span></div>';}).join('');
+  else pl.innerHTML=d.ultimosPix.slice(0,12).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';return`<div class="px ${s?'s':'a'}"><span class="px-tag ${s?'ts':'ta'}">${s?'SINAL':'APROV'}</span><span class="px-d">${p.descricao||'PIX'} · ${LBL[p.categoria]||''}</span><span class="px-h">${H(p.horario)}</span><span class="px-v">${R(p.valor)}</span></div>`;}).join('');
   const ctx=document.getElementById('chart').getContext('2d');
   const labels=[],sin=[],apr=[];
   for(let i=1;i<=d.diaAtual;i++){labels.push(String(i).padStart(2,'0'));const dd=d.porDia[i]||{};sin.push((dd.sinal_19||0)+(dd.sinal_24||0));apr.push((dd.aprov_60||0)+(dd.aprov_65||0)+(dd.aprov_70||0));}
   if(ch)ch.destroy();
-  ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Sinais',data:sin,backgroundColor:'rgba(61,142,255,.45)',borderColor:'#3d8eff',borderWidth:1,borderRadius:3},{label:'Aprovados',data:apr,backgroundColor:'rgba(124,92,252,.45)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10,family:'Inter'},boxWidth:8,padding:12}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$'+c.raw.toFixed(2)}}},scales:{x:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9}},grid:{color:'#0d0d1a'}},y:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
+  ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Sinais',data:sin,backgroundColor:'rgba(61,142,255,.45)',borderColor:'#3d8eff',borderWidth:1,borderRadius:3},{label:'Aprovados',data:apr,backgroundColor:'rgba(124,92,252,.45)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10},boxWidth:8,padding:12}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$'+c.raw.toFixed(2)}}},scales:{x:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9}},grid:{color:'#0d0d1a'}},y:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
   S('upd','atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
 }
 async function load(){
