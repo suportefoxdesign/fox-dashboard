@@ -49,7 +49,7 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
 .meta-bar-pct.ok{color:#00cc66}
 .funil-card{background:#111;border:1px solid #1e1e1e;border-left:3px solid #FF6600;border-radius:6px;padding:16px 24px;margin-bottom:10px}
 .funil-title{font-size:10px;color:#FF6600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;font-weight:700}
-.funil-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#1a1a1a;border-radius:4px;overflow:hidden;margin-bottom:10px}
+.funil-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:#1a1a1a;border-radius:4px;overflow:hidden;margin-bottom:10px}
 .funil-item{background:#0f0f0f;padding:14px 16px;text-align:center}
 .funil-num{font-size:28px;font-weight:800;color:#e0e0e0;line-height:1;margin-bottom:4px}
 .funil-num.blue{color:#4488ff}.funil-num.green{color:#00cc66}
@@ -80,10 +80,25 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
 </style>
 </head>
 <body>
+<div id="login-overlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:999;display:flex;align-items:center;justify-content:center">
+  <div style="background:#111;border:1px solid #222;border-radius:12px;padding:32px;width:300px;text-align:center">
+    <div style="font-size:32px;margin-bottom:8px">🦊</div>
+    <div style="font-size:18px;font-weight:700;color:#FF6600;margin-bottom:4px">Fox Design</div>
+    <div style="font-size:12px;color:#555;margin-bottom:20px">Dashboard Financeiro</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="sel-pett" onclick="selUser('pett')" style="flex:1;padding:8px;border-radius:6px;border:1px solid #333;background:#222;color:#fff;cursor:pointer;font-size:12px">🦊 Pett</button>
+      <button id="sel-franca" onclick="selUser('franca')" style="flex:1;padding:8px;border-radius:6px;border:1px solid #333;background:#222;color:#fff;cursor:pointer;font-size:12px">👨‍🎨 França</button>
+      <button id="sel-gui" onclick="selUser('gui')" style="flex:1;padding:8px;border-radius:6px;border:1px solid #333;background:#222;color:#fff;cursor:pointer;font-size:12px">👤 Gui</button>
+    </div>
+    <input type="password" id="login-pass" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding:10px 12px;border-radius:6px;border:1px solid #333;background:#0d0d0d;color:#fff;font-size:14px;box-sizing:border-box;margin-bottom:10px">
+    <button onclick="doLogin()" style="width:100%;padding:10px;border-radius:6px;border:none;background:#FF6600;color:#fff;font-weight:700;cursor:pointer;font-size:14px">Entrar</button>
+    <div id="login-err" style="display:none;color:#ff4444;font-size:12px;margin-top:8px"></div>
+  </div>
+</div>
 <div class="header">
   <div class="header-brand"><div class="header-logo">🦊</div><div><div class="header-name">Fox Design</div><div class="header-sub" id="header-mes">Junho 2026</div></div></div>
   <nav class="nav"><div class="nav-item active">Hoje</div><div class="nav-item">Histórico</div></nav>
-  <div class="header-right"><div class="live"><div class="live-dot"></div><span id="update-time">Carregando...</span></div><button class="btn-refresh" onclick="carregar()">↻ Atualizar</button></div>
+  <div class="header-right"><div class="live"><div class="live-dot"></div><span id="update-time">Carregando...</span></div><span id="user-badge" style="font-size:12px;color:#888"></span><button class="btn-refresh" onclick="carregar()">↻ Atualizar</button><button class="btn-refresh" onclick="localStorage.removeItem('fox_user');location.reload()" style="color:#ff4444">Sair</button></div>
 </div>
 <div class="main">
 <div class="erro" id="erro">⚠ <span id="erro-msg"></span></div>
@@ -118,11 +133,12 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
 <div class="funil-card">
   <div class="funil-title" id="funil-title">FUNIL DO DIA</div>
   <div class="funil-grid">
+    <div class="funil-item"><div class="funil-num blue" id="f-10">0</div><div class="funil-sub">PIX R$10<br>fechados</div></div>
     <div class="funil-item"><div class="funil-num blue" id="f-19">0</div><div class="funil-sub">PIX R$19,90<br>fechados</div></div>
     <div class="funil-item"><div class="funil-num blue" id="f-24">0</div><div class="funil-sub">PIX R$24,90<br>fechados</div></div>
     <div class="funil-item"><div class="funil-num green" id="f-60">0</div><div class="funil-sub">PIX R$60<br>aprovados</div></div>
-    <div class="funil-item"><div class="funil-num green" id="f-65">0</div><div class="funil-sub">PIX R$65<br>aprovados</div></div>
-    <div class="funil-item"><div class="funil-num green" id="f-70">0</div><div class="funil-sub">PIX R$70+<br>aprovados</div></div>
+    <div class="funil-item"><div class="funil-num green" id="f-69">0</div><div class="funil-sub">PIX R$69,90<br>aprovados</div></div>
+    <div class="funil-item"><div class="funil-num green" id="f-75">0</div><div class="funil-sub">PIX R$75+<br>aprovados</div></div>
   </div>
   <div class="funil-footer">
     <div>Sinais: <strong id="ff-sinais">0</strong></div>
@@ -135,12 +151,13 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
   <div class="mes-card">
     <div class="mes-card-title">RESUMO DO MÊS</div>
     <div class="mes-stats">
+      <div><div class="mes-stat-label">Total 10,00</div><div class="mes-stat-val blue" id="m-10">R$0</div><div class="mes-stat-sub" id="m-10-n">0 sinais</div></div>
       <div><div class="mes-stat-label">Total 19,90</div><div class="mes-stat-val blue" id="m-19">R$0</div><div class="mes-stat-sub" id="m-19-n">0 sinais</div></div>
       <div><div class="mes-stat-label">Total 24,90</div><div class="mes-stat-val blue" id="m-24">R$0</div><div class="mes-stat-sub" id="m-24-n">0 sinais</div></div>
       <div><div class="mes-stat-label">Total Sinais</div><div class="mes-stat-val blue" id="m-sinais">R$0</div><div class="mes-stat-sub" id="m-sinais-n">0 total</div></div>
       <div><div class="mes-stat-label">Total 60,00</div><div class="mes-stat-val green" id="m-60">R$0</div><div class="mes-stat-sub" id="m-60-n">0 aprov.</div></div>
-      <div><div class="mes-stat-label">Total 65,00</div><div class="mes-stat-val green" id="m-65">R$0</div><div class="mes-stat-sub" id="m-65-n">0 aprov.</div></div>
-      <div><div class="mes-stat-label">Total 70,00+</div><div class="mes-stat-val green" id="m-70">R$0</div><div class="mes-stat-sub" id="m-70-n">0 aprov.</div></div>
+      <div><div class="mes-stat-label">Total 69,90</div><div class="mes-stat-val green" id="m-69">R$0</div><div class="mes-stat-sub" id="m-69-n">0 aprov.</div></div>
+      <div><div class="mes-stat-label">Total 75,00+</div><div class="mes-stat-val green" id="m-75">R$0</div><div class="mes-stat-sub" id="m-75-n">0 aprov.</div></div>
     </div>
   </div>
   <div class="mes-card">
@@ -154,17 +171,22 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
 </div>
 </div>
 <script>
-const API='/api/bridge';let chart=null;
+const API='/api/bridge';
+const USERS={pett:{name:'Pett',emoji:'🦊',pass:'peterson1.'},franca:{name:'França',emoji:'👨\u200d🎨',pass:'agoravai1402'},gui:{name:'Gui',emoji:'👤',pass:'alien2024'}};
+let _selUser=null;
+function selUser(u){_selUser=u;['pett','franca','gui'].forEach(x=>{const b=document.getElementById('sel-'+x);if(b)b.style.background=x===u?'#FF6600':'';});document.getElementById('login-err').style.display='none';}
+function doLogin(){const err=document.getElementById('login-err');if(!_selUser){err.textContent='Selecione o usuario';err.style.display='block';return;}const pass=document.getElementById('login-pass').value;if(pass!==USERS[_selUser].pass){err.textContent='Senha incorreta';err.style.display='block';return;}localStorage.setItem('fox_user',_selUser);document.getElementById('login-overlay').style.display='none';document.getElementById('user-badge').textContent=USERS[_selUser].emoji+' '+USERS[_selUser].name;setTimeout(carregar,100);}
+(function(){const u=localStorage.getItem('fox_user');if(u&&USERS[u]){document.getElementById('login-overlay').style.display='none';document.getElementById('user-badge').textContent=USERS[u].emoji+' '+USERS[u].name;}})();let chart=null;
 const R=v=>'R$'+(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const N=v=>Math.round(v||0);
 function hora(iso){if(!iso)return'';return new Date(iso).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});}
 function set(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
 function render(d){
   const h=d.hoje,m=d.mes;
-  const nSH=N(h.sinal_19/19.9)+N(h.sinal_24/24.9);
-  const nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
-  const nSM=N(m.sinal_19/19.9)+N(m.sinal_24/24.9);
-  const nAM=N(m.aprov_60/60)+N(m.aprov_65/65)+N(m.aprov_70/70);
+  const nSH=N(h.sinal_10/10)+N(h.sinal_19/19.9)+N(h.sinal_24/24.9);
+  const nAH=N(h.aprov_60/60)+N(h.aprov_69/69.9)+N(h.aprov_75/75);
+  const nSM=N(m.sinal_10/10)+N(m.sinal_19/19.9)+N(m.sinal_24/24.9);
+  const nAM=N(m.aprov_60/60)+N(m.aprov_69/69.9)+N(m.aprov_75/75);
   const convM=nSM>0?Math.round(nAM/nSM*100):0;
   const convH=nSH>0?Math.round(nAH/nSH*100):0;
   const ticket=nAM>0?m.aprovados/nAM:0;
@@ -182,29 +204,29 @@ function render(d){
   if(h.total>=700){metaEl.textContent='✓ Meta atingida!';metaEl.className='hero-meta ok';}
   else{metaEl.textContent='Faltam '+R(700-h.total)+' para a meta';metaEl.className='hero-meta nok';}
   const ul=d.ultimosPix&&d.ultimosPix[0];
-  if(ul){set('h-ultimo-val',R(ul.valor));set('h-ultimo-hora',hora(ul.horario)+' · '+({sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_65:'R$65',aprov_70:'R$70+'}[ul.categoria]||''));}
+  if(ul){set('h-ultimo-val',R(ul.valor));set('h-ultimo-hora',hora(ul.horario)+' · '+({sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_69:'R$69,90',aprov_75:'R$75+'}[ul.categoria]||''));}
   set('h-pix-count',h.count);set('h-aprov-hoje',R(h.aprovados));set('h-aprov-sub',nAH+' fechamentos');
   const fill=document.getElementById('meta-fill');fill.style.width=pct+'%';fill.className='meta-bar-fill'+(pct>=100?' ok':'');
   const pctEl=document.getElementById('meta-pct');pctEl.textContent=pct.toFixed(0)+'%';pctEl.className='meta-bar-pct'+(pct>=100?' ok':'');
-  set('f-19',N(h.sinal_19/19.9));set('f-24',N(h.sinal_24/24.9));
-  set('f-60',N(h.aprov_60/60));set('f-65',N(h.aprov_65/65));set('f-70',N(h.aprov_70/70));
+  set('f-10',N(h.sinal_10/10));set('f-19',N(h.sinal_19/19.9));set('f-24',N(h.sinal_24/24.9));
+  set('f-60',N(h.aprov_60/60));set('f-69',N(h.aprov_69/69.9));set('f-75',N(h.aprov_75/75));
   set('ff-sinais',nSH);set('ff-aprov',nAH);set('ff-conv',convH+'%');set('ff-fat',R(h.total));
-  set('m-19',R(m.sinal_19));set('m-19-n',N(m.sinal_19/19.9)+' sinais');
+  set('m-10',R(m.sinal_10));set('m-10-n',N(m.sinal_10/10)+' sinais');set('m-19',R(m.sinal_19));set('m-19-n',N(m.sinal_19/19.9)+' sinais');
   set('m-24',R(m.sinal_24));set('m-24-n',N(m.sinal_24/24.9)+' sinais');
   set('m-sinais',R(m.sinais));set('m-sinais-n',nSM+' total');
   set('m-60',R(m.aprov_60));set('m-60-n',N(m.aprov_60/60)+' aprov.');
-  set('m-65',R(m.aprov_65));set('m-65-n',N(m.aprov_65/65)+' aprov.');
-  set('m-70',R(m.aprov_70));set('m-70-n',N(m.aprov_70/70)+' aprov.');
+  set('m-69',R(m.aprov_69));set('m-69-n',N(m.aprov_69/69.9)+' aprov.');
+  set('m-75',R(m.aprov_75));set('m-75-n',N(m.aprov_75/75)+' aprov.');
   const pl=document.getElementById('pix-list');
   if(!d.ultimosPix||!d.ultimosPix.length){pl.innerHTML='<div class="empty">Nenhum PIX hoje</div>';}
-  else{pl.innerHTML=d.ultimosPix.slice(0,10).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';const lbl={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_65:'R$65',aprov_70:'R$70+'}[p.categoria]||'';return'<div class="pix-row '+(s?'sinal':'aprov')+'"><span class="pix-tag '+(s?'tag-sinal':'tag-aprov')+'">'+(s?'SINAL':'APROV')+'</span><span class="pix-desc">'+(p.descricao||'PIX')+' · '+lbl+'</span><span class="pix-hora">'+hora(p.horario)+'</span><span class="pix-val">'+R(p.valor)+'</span></div>';}).join('');}
+  else{pl.innerHTML=d.ultimosPix.slice(0,10).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';const lbl={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_69:'R$69,90',aprov_75:'R$75+'}[p.categoria]||'';return'<div class="pix-row '+(s?'sinal':'aprov')+'"><span class="pix-tag '+(s?'tag-sinal':'tag-aprov')+'">'+(s?'SINAL':'APROV')+'</span><span class="pix-desc">'+(p.descricao||'PIX')+' · '+lbl+'</span><span class="pix-hora">'+hora(p.horario)+'</span><span class="pix-val">'+R(p.valor)+'</span></div>';}).join('');}
   renderChart(d.porDia,d.diaAtual);
   set('update-time','Atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
 }
 function renderChart(porDia,diaAtual){
   const ctx=document.getElementById('chart').getContext('2d');
   const labels=[],sinais=[],aprovados=[];
-  for(let d=1;d<=diaAtual;d++){labels.push(String(d).padStart(2,'0'));const dia=porDia[d]||{};sinais.push((dia.sinal_19||0)+(dia.sinal_24||0));aprovados.push((dia.aprov_60||0)+(dia.aprov_65||0)+(dia.aprov_70||0));}
+  for(let d=1;d<=diaAtual;d++){labels.push(String(d).padStart(2,'0'));const dia=porDia[d]||{};sinais.push((dia.sinal_10||0)+(dia.sinal_19||0)+(dia.sinal_24||0));aprovados.push((dia.aprov_60||0)+(dia.aprov_69||0)+(dia.aprov_75||0));}
   if(chart)chart.destroy();
   chart=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Sinais',data:sinais,backgroundColor:'rgba(68,136,255,0.6)',borderColor:'#4488ff',borderWidth:1,borderRadius:2},{label:'Aprovados',data:aprovados,backgroundColor:'rgba(0,204,102,0.6)',borderColor:'#00cc66',borderWidth:1,borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#444',font:{size:10}}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$'+c.raw.toFixed(2)}}},scales:{x:{stacked:true,ticks:{color:'#333',font:{size:9}},grid:{color:'#141414'}},y:{stacked:true,ticks:{color:'#333',font:{size:9},callback:v=>'R$'+v},grid:{color:'#141414'}}}}});
 }
@@ -213,6 +235,6 @@ async function carregar(){
   try{const r=await fetch(API+'?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);const data=await r.json();if(data.error)throw new Error(data.error);render(data);}
   catch(e){document.getElementById('erro').style.display='block';document.getElementById('erro-msg').textContent=e.message;}
 }
-carregar();setInterval(carregar,5*60*1000);
+window.addEventListener('load',function(){setTimeout(carregar,300);setInterval(carregar,5*60*1000);});
 </script>
 </body></html>
