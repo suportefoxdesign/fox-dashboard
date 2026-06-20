@@ -172,7 +172,7 @@ body{background:#0d0d0d;color:#e0e0e0;font-family:'Segoe UI',system-ui,sans-seri
 </div>
 <script>
 const API='/api/bridge';
-const USERS={pett:{name:'Pett',emoji:'🦊',pass:'peterson1.'},franca:{name:'França',emoji:'👨\u200d🎨',pass:'agoravai1402'},gui:{name:'Gui',emoji:'👤',pass:'alien2024'}};
+const USERS={pett:{name:'Pett',emoji:'🦊',pass:'peterson1.'},franca:{name:'França',emoji:'👨‍🎨',pass:'agoravai1402'},gui:{name:'Gui',emoji:'👤',pass:'alien2024'}};
 let _selUser=null;
 function selUser(u){_selUser=u;['pett','franca','gui'].forEach(x=>{const b=document.getElementById('sel-'+x);if(b)b.style.background=x===u?'#FF6600':'';});document.getElementById('login-err').style.display='none';}
 function doLogin(){const err=document.getElementById('login-err');if(!_selUser){err.textContent='Selecione o usuario';err.style.display='block';return;}const pass=document.getElementById('login-pass').value;if(pass!==USERS[_selUser].pass){err.textContent='Senha incorreta';err.style.display='block';return;}localStorage.setItem('fox_user',_selUser);document.getElementById('login-overlay').style.display='none';document.getElementById('user-badge').textContent=USERS[_selUser].emoji+' '+USERS[_selUser].name;setTimeout(carregar,100);}
