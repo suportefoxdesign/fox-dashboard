@@ -44,10 +44,10 @@ function processMes(rows, diaHoje, mesAtual, targetMes) {
   // Colunas: A=DATA(0) B=TRÁFEGO(1) C=SAÍDA(2) D=DESPESAS(3) E=FAT(4) F=19,90qtd(5) G=24,90qtd(6) H=10qtd(7) I=60qtd(8) J=65qtd(9) K=70+qtd(10) L=LUCRO(11)
   const result = {
     fat: 0, sinais: 0, aprovados: 0,
-    sinal_10: 0, sinal_19: 0, sinal_24: 0, aprov_60: 0, aprov_65: 0, aprov_70: 0,
+    sinal_10: 0, sinal_19: 0, sinal_24: 0, aprov_60: 0, aprov_69: 0, aprov_75: 0,
     trafego: 0, saida: 0, despesas: 0, lucro: 0,
     porDia: {}, count: 0,
-    hoje: { sinal_10:0, sinal_19:0, sinal_24:0, aprov_60:0, aprov_65:0, aprov_70:0, total:0, count:0, sinais:0, aprovados:0 }
+    hoje: { sinal_10:0, sinal_19:0, sinal_24:0, aprov_60:0, aprov_69:0, aprov_75:0, total:0, count:0, sinais:0, aprovados:0 }
   };
 
   for (let i = 3; i < rows.length; i++) {
@@ -72,7 +72,7 @@ function processMes(rows, diaHoje, mesAtual, targetMes) {
 
     const v10 = q10 * 10.00;
     const v19 = q19 * 19.90, v24 = q24 * 24.90;
-    const v60 = q60 * 60.00, v65 = q65 * 65.00, v70 = q70 * 70.00;
+    const v60 = q60 * 60.00, v65 = q65 * 69.90, v70 = q70 * 75.00;
     const vCalc = v10+v19+v24+v60+v65+v70;
     const totalDia = vCalc > 0 ? vCalc : fat;
 
@@ -80,28 +80,28 @@ function processMes(rows, diaHoje, mesAtual, targetMes) {
 
     result.fat      += totalDia;
     result.sinal_10 += v10; result.sinal_19 += v19; result.sinal_24 += v24;
-    result.aprov_60 += v60; result.aprov_65 += v65; result.aprov_70 += v70;
+    result.aprov_60 += v60; result.aprov_69 += v65; result.aprov_75 += v70;
     result.trafego  += traf; result.saida += saida; result.despesas += desp;
     if (totalDia > 0) result.count++;
 
     result.porDia[dia] = {
-      sinal_10:v10, sinal_19:v19, sinal_24:v24, aprov_60:v60, aprov_65:v65, aprov_70:v70,
+      sinal_10:v10, sinal_19:v19, sinal_24:v24, aprov_60:v60, aprov_69:v65, aprov_75:v70,
       total:totalDia, trafego:traf, saida:saida, despesas:desp
     };
 
     if (targetMes === mesAtual && dia === diaHoje) {
       result.hoje.sinal_10 += v10; result.hoje.sinal_19 += v19; result.hoje.sinal_24 += v24;
-      result.hoje.aprov_60 += v60; result.hoje.aprov_65 += v65; result.hoje.aprov_70 += v70;
+      result.hoje.aprov_60 += v60; result.hoje.aprov_69 += v65; result.hoje.aprov_75 += v70;
       result.hoje.total += totalDia;
       result.hoje.count = Math.round(q10+q19+q24+q60+q65+q70);
     }
   }
 
   result.sinais    = result.sinal_10 + result.sinal_19 + result.sinal_24;
-  result.aprovados = result.aprov_60 + result.aprov_65 + result.aprov_70;
+  result.aprovados = result.aprov_60 + result.aprov_69 + result.aprov_75;
   result.lucro     = result.fat - result.trafego - result.saida;
   result.hoje.sinais    = result.hoje.sinal_10 + result.hoje.sinal_19 + result.hoje.sinal_24;
-  result.hoje.aprovados = result.hoje.aprov_60 + result.hoje.aprov_65 + result.hoje.aprov_70;
+  result.hoje.aprovados = result.hoje.aprov_60 + result.hoje.aprov_69 + result.hoje.aprov_75;
   return result;
 }
 
@@ -137,7 +137,7 @@ module.exports = async (req, res) => {
       hoje: mesData.hoje,
       mes: {
         sinal_10: mesData.sinal_10, sinal_19: mesData.sinal_19, sinal_24: mesData.sinal_24,
-        aprov_60: mesData.aprov_60, aprov_65: mesData.aprov_65, aprov_70: mesData.aprov_70,
+        aprov_60: mesData.aprov_60, aprov_69: mesData.aprov_69, aprov_75: mesData.aprov_75,
         total: mesData.fat, sinais: mesData.sinais, aprovados: mesData.aprovados,
         trafego: mesData.trafego, saida: mesData.saida, despesas: mesData.despesas, lucro: mesData.lucro,
         count: mesData.count
