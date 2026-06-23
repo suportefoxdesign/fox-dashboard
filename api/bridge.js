@@ -74,7 +74,7 @@ function processMes(rows, diaHoje, mesAtual, targetMes) {
     const v19 = q19 * 19.90, v24 = q24 * 24.90;
     const v60 = q60 * 60.00, v65 = q65 * 69.90, v70 = q70 * 75.00;
     const vCalc = v10+v19+v24+v60+v65+v70;
-    const totalDia = vCalc > 0 ? vCalc : fat;
+    const totalDia = fat > 0 ? fat : vCalc;
 
     if (totalDia === 0 && traf === 0 && saida === 0 && desp === 0) continue;
 
