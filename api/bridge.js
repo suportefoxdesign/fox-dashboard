@@ -8,6 +8,7 @@ const GID_MAP = {
   4: 763503663,   // Abril
   5: 923945500,   // Maio
   6: 926032448,   // Junho
+  7: 1673745313,   // Julho
 };
 
 const NOMES = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
