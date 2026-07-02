@@ -115,8 +115,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 .login-err{font-size:11px;color:var(--red);margin-top:8px;display:none}
 </style></head>
 <body>
+  <span id="user-badge" style="display:none"></span>
 <div class="hdr">
-  <div class="logo"><img src="/fox_logo.png" style="height:40px;object-fit:contain;mix-blend-mode:screen"><div><div class="logo-name">Fox Design</div><div class="logo-sub">Junho 2026</div></div></div>
+  <div class="logo"><img src="/fox_logo.png" style="height:40px;object-fit:contain;mix-blend-mode:screen"><div><div class="logo-name">Fox Design</div><div class="logo-sub">Julho 2026</div></div></div>
   <nav class="nav">
     <div class="nav-item on" onclick="showTab('hoje',this)">Hoje</div>
     <div class="nav-item" onclick="showTab('historico',this)">Histórico</div>
@@ -175,7 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       </div>
       <div class="f-foot"><span>Sinais: <strong id="fs1">0</strong></span><span>Aprovados: <strong id="fs2">0</strong></span><span>Conversão: <strong id="fs3">0%</strong></span><span>Faturamento: <strong id="fs4">R$0</strong></span></div>
     </div>
-    <div class="chart-card"><div class="s-title">Faturamento por dia — Junho</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
+    <div class="chart-card"><div class="s-title">Faturamento por dia — Julho</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
     <div class="cols">
       <div class="card"><div class="s-title">Resumo do Mês</div><div class="m-grid">
         <div><div class="m-l">10 fechados</div><div class="m-v b" id="m0">0</div><div class="m-s" id="m0r">R$0</div></div>
@@ -197,7 +198,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <!-- GASTOS -->
   <div id="tab-gastos" class="tab">
     <div class="cols">
-      <div class="card"><div class="s-title">Gastos — Junho 2026</div><div id="gastos-lista"></div></div>
+      <div class="card"><div class="s-title">Gastos — Julho 2026</div><div id="gastos-lista"></div></div>
       <div class="card"><div class="s-title">Resumo Financeiro</div><div id="gastos-resumo"></div></div>
     </div>
   </div>
