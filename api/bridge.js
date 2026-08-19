@@ -1,6 +1,15 @@
 // bridge.js — Fox Dashboard
 const SHEET_ID = '1j_ZANhnTaSVmAMpP2OM2LKo6Wbq0tFP0cTs2Ck0qXNw';
 
+// Nome da aba de cada mes na planilha (usado via gviz, dispensa gid).
+const TAB_NAMES = {
+  1:'JANEIRO', 2:'FEVEREIRO', 3:'MARCO', 4:'ABRIL', 5:'MAIO', 6:'JUNHO',
+  7:'JULHO', 8:'AGOSTO', 9:'SETEMBRO', 10:'OUTUBRO', 11:'NOVEMBRO', 12:'DEZEMBRO'
+};
+// Variacoes de grafia tentadas quando o nome acima nao existe.
+const TAB_ALIASES = { 3:['MARÇO','Março'], 8:['Agosto'], 9:['Setembro'], 10:['Outubro'], 11:['Novembro'], 12:['Dezembro'] };
+
+// Fallback: gids conhecidos (usado se a busca por nome falhar).
 const GID_MAP = {
   1: 1120750679,  // Janeiro
   2: 789516197,   // Fevereiro
@@ -8,7 +17,7 @@ const GID_MAP = {
   4: 763503663,   // Abril
   5: 923945500,   // Maio
   6: 926032448,   // Junho
-  7: 1673745313,   // Julho
+  7: 1673745313,  // Julho
 };
 
 const NOMES = {1:'Janeiro',2:'Fevereiro',3:'Março',4:'Abril',5:'Maio',6:'Junho',7:'Julho',8:'Agosto',9:'Setembro',10:'Outubro',11:'Novembro',12:'Dezembro'};
@@ -19,11 +28,46 @@ function parseNum(s) {
   return isNaN(n) ? 0 : Math.abs(n);
 }
 
-async function getCSV(gid) {
-  const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + gid;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('CSV error ' + r.status + ' gid=' + gid);
-  return r.text();
+function looksLikeCSV(text) {
+  if (!text) return false;
+  const head = text.slice(0, 200);
+  // gviz devolve JS ("google.visualization...") ou HTML quando a aba nao existe
+  if (/^\s*[<{]/.test(head) || /google\.visualization|invalid_query|Bad Request/i.test(head)) return false;
+  return text.split('\n').length > 3;
+}
+
+async function tryFetch(url) {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    const t = await r.text();
+    return looksLikeCSV(t) ? t : null;
+  } catch (e) { return null; }
+}
+
+// Busca o CSV do mes: gid conhecido primeiro (deterministico); senao, pelo nome da aba.
+// ATENCAO: quando o nome nao existe, o gviz devolve a PRIMEIRA aba em vez de dar erro
+// — por isso o resultado por nome e conferido contra os outros meses (ver dedupe abaixo).
+async function getMesCSV(m) {
+  if (GID_MAP[m]) {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + GID_MAP[m];
+    const csv = await tryFetch(url);
+    if (csv) return { csv: csv, via: 'gid:' + GID_MAP[m], confiavel: true };
+  }
+  const nomes = [TAB_NAMES[m], ...(TAB_ALIASES[m] || [])].filter(Boolean);
+  for (const nome of nomes) {
+    const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+                '/gviz/tq?tqx=out:csv&headers=0&sheet=' + encodeURIComponent(nome);
+    const csv = await tryFetch(url);
+    if (csv) return { csv: csv, via: 'nome:' + nome, confiavel: false };
+  }
+  return null;
+}
+
+function hashCSV(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return s.length + ':' + h;
 }
 
 function parseCSV(text) {
@@ -43,22 +87,30 @@ function parseCSV(text) {
 
 function processMes(rows, diaHoje, mesAtual, targetMes) {
   // Colunas: A=DATA(0) B=TRÁFEGO(1) C=SAÍDA(2) D=DESPESAS(3) E=FAT(4) F=19,90qtd(5) G=24,90qtd(6) H=10qtd(7) I=60qtd(8) J=65qtd(9) K=70+qtd(10) L=LUCRO(11)
+  const isMesCorrente = targetMes === mesAtual;
   const result = {
     fat: 0, sinais: 0, aprovados: 0,
     sinal_10: 0, sinal_19: 0, sinal_24: 0, aprov_60: 0, aprov_69: 0, aprov_75: 0,
     trafego: 0, saida: 0, despesas: 0, lucro: 0,
-    porDia: {}, count: 0,
+    porDia: {}, count: 0, diasFuturosIgnorados: 0,
     hoje: { sinal_10:0, sinal_19:0, sinal_24:0, aprov_60:0, aprov_69:0, aprov_75:0, total:0, count:0, sinais:0, aprovados:0 }
   };
 
-  for (let i = 3; i < rows.length; i++) {
+  const vistos = {};
+  for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     if (!row || row.length < 5) continue;
     const diaCell = String(row[0] || '');
     const diaMatch = diaCell.match(/(\d+)/);
-    if (!diaMatch) continue;
+    if (!diaMatch) continue;                 // linhas de cabecalho caem aqui
     const dia = parseInt(diaMatch[1]);
     if (dia < 1 || dia > 31) continue;
+    if (vistos[dia]) continue;               // protege contra linhas de total repetindo o dia
+    vistos[dia] = true;
+
+    // No mes corrente, dias que ainda nao chegaram nao entram na conta.
+    // (A planilha costuma ter o trafego fixo lancado no mes inteiro.)
+    if (isMesCorrente && dia > diaHoje) { result.diasFuturosIgnorados++; continue; }
 
     const fat  = parseNum(row[4]);
     const q10  = parseNum(row[7]);
@@ -90,7 +142,7 @@ function processMes(rows, diaHoje, mesAtual, targetMes) {
       total:totalDia, trafego:traf, saida:saida, despesas:desp
     };
 
-    if (targetMes === mesAtual && dia === diaHoje) {
+    if (isMesCorrente && dia === diaHoje) {
       result.hoje.sinal_10 += v10; result.hoje.sinal_19 += v19; result.hoje.sinal_24 += v24;
       result.hoje.aprov_60 += v60; result.hoje.aprov_69 += v65; result.hoje.aprov_75 += v70;
       result.hoje.total += totalDia;
@@ -116,23 +168,48 @@ module.exports = async (req, res) => {
     const br = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
     const mesAtual = br.getMonth() + 1;
     const diaHoje  = br.getDate();
+    const anoAtual = br.getFullYear();
 
-    const meses = Object.keys(GID_MAP).map(Number);
-    const csvs  = await Promise.all(meses.map(m => getCSV(GID_MAP[m]).catch(() => null)));
+    // Somente meses ja iniciados (1..mes corrente).
+    const meses = [];
+    for (let m = 1; m <= mesAtual; m++) meses.push(m);
+    const fetched = await Promise.all(meses.map(m => getMesCSV(m).catch(() => null)));
 
     const historico = {};
+    const fontes = {};
     let mesData = null;
+    const avisos = [];
+    const hashes = {};
 
     for (let idx = 0; idx < meses.length; idx++) {
       const m = meses[idx];
-      if (!csvs[idx]) continue;
-      const rows = parseCSV(csvs[idx]);
+      const f = fetched[idx];
+      if (!f) { avisos.push('Aba de ' + NOMES[m] + ' não encontrada na planilha'); continue; }
+
+      // Duas abas com conteudo identico = o gviz devolveu a aba errada. Descarta.
+      const h = hashCSV(f.csv);
+      if (hashes[h] !== undefined) {
+        avisos.push('Aba de ' + NOMES[m] + ' não encontrada (a planilha devolveu a aba de ' + NOMES[hashes[h]] + ')');
+        continue;
+      }
+      hashes[h] = m;
+
+      const rows = parseCSV(f.csv);
       const data = processMes(rows, diaHoje, mesAtual, m);
       historico[m] = { nome: NOMES[m], ...data };
+      fontes[m] = f.via;
       if (m === mesAtual) mesData = data;
     }
 
-    if (!mesData) throw new Error('Dados do mês atual não encontrados');
+    // Sem o mes corrente o painel nao deve morrer: mostra o ultimo mes disponivel.
+    let mesExibido = mesAtual;
+    if (!mesData) {
+      const disponiveis = Object.keys(historico).map(Number).sort((a,b) => b-a);
+      if (!disponiveis.length) throw new Error('Nenhum mês encontrado na planilha');
+      mesExibido = disponiveis[0];
+      mesData = historico[mesExibido];
+      avisos.push('Exibindo ' + NOMES[mesExibido] + ' (aba de ' + NOMES[mesAtual] + ' ainda não existe)');
+    }
 
     const resp = {
       hoje: mesData.hoje,
@@ -148,6 +225,12 @@ module.exports = async (req, res) => {
       mediaDiaria: mesData.count > 0 ? mesData.fat / mesData.count : 0,
       meta: 700,
       diaAtual: diaHoje,
+      mesNumero: mesExibido,
+      mesNome: NOMES[mesExibido],
+      ano: anoAtual,
+      diasFuturosIgnorados: mesData.diasFuturosIgnorados || 0,
+      avisos: avisos,
+      fontes: fontes,
       timestamp: new Date().toISOString(),
       ultimosPix: [],
       historico: historico,
