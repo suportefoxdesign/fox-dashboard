@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="/fox_logo.png"><title>Fox Design — Dashboard</title>
+<link rel="icon" type="image/png" href="/fox%20logo.png"><title>Fox Design — Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
@@ -117,7 +117,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <body>
   <span id="user-badge" style="display:none"></span>
 <div class="hdr">
-  <div class="logo"><img src="/fox_logo.png" style="height:40px;object-fit:contain;mix-blend-mode:screen"><div><div class="logo-name">Fox Design</div><div class="logo-sub">Julho 2026</div></div></div>
+  <div class="logo"><img src="/fox%20logo.png" style="height:40px;object-fit:contain;mix-blend-mode:screen"><div><div class="logo-name">Fox Design</div><div class="logo-sub" id="logo-mes">—</div></div></div>
   <nav class="nav">
     <div class="nav-item on" onclick="showTab('hoje',this)">Hoje</div>
     <div class="nav-item" onclick="showTab('historico',this)">Histórico</div>
@@ -129,7 +129,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
 <div class="main">
   <div class="login-overlay" id="login-overlay">
   <div class="login-box">
-    <img class="login-logo" src="/fox_logo.png" style="mix-blend-mode:screen">
+    <img class="login-logo" src="/fox%20logo.png" style="mix-blend-mode:screen">
     <div class="login-title">Fox Design</div>
     <div class="login-sub">Dashboard Financeiro</div>
     <div class="login-btns">
@@ -176,7 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
       </div>
       <div class="f-foot"><span>Sinais: <strong id="fs1">0</strong></span><span>Aprovados: <strong id="fs2">0</strong></span><span>Conversão: <strong id="fs3">0%</strong></span><span>Faturamento: <strong id="fs4">R$0</strong></span></div>
     </div>
-    <div class="chart-card"><div class="s-title">Faturamento por dia — Julho</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
+    <div class="chart-card"><div class="s-title" id="t-chart-dia">Faturamento por dia</div><div class="chart-wrap"><canvas id="chart"></canvas></div></div>
     <div class="cols">
       <div class="card"><div class="s-title">Resumo do Mês</div><div class="m-grid">
         <div><div class="m-l">10 fechados</div><div class="m-v b" id="m0">0</div><div class="m-s" id="m0r">R$0</div></div>
@@ -198,7 +198,7 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
   <!-- GASTOS -->
   <div id="tab-gastos" class="tab">
     <div class="cols">
-      <div class="card"><div class="s-title">Gastos — Julho 2026</div><div id="gastos-lista"></div></div>
+      <div class="card"><div class="s-title" id="t-gastos">Gastos</div><div id="gastos-lista"></div></div>
       <div class="card"><div class="s-title">Resumo Financeiro</div><div id="gastos-resumo"></div></div>
     </div>
   </div>
@@ -272,14 +272,17 @@ function renderLucros(d){
 function render(d){
   _data=d;
   const h=d.hoje,m=d.mes;
-  const nSH=N(h.sinal_10/10)+N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_65/65)+N(h.aprov_70/70);
-  const nSM=N(m.sinal_10/10)+N(m.sinal_19/19.9)+N(m.sinal_24/24.9),nAM=N(m.aprov_60/60)+N(m.aprov_65/65)+N(m.aprov_70/70);
+  const nSH=N(h.sinal_10/10)+N(h.sinal_19/19.9)+N(h.sinal_24/24.9),nAH=N(h.aprov_60/60)+N(h.aprov_69/69.9)+N(h.aprov_75/75);
+  const nSM=N(m.sinal_10/10)+N(m.sinal_19/19.9)+N(m.sinal_24/24.9),nAM=N(m.aprov_60/60)+N(m.aprov_69/69.9)+N(m.aprov_75/75);
   const cM=nSM>0?Math.round(nAM/nSM*100):0,cH=nSH>0?Math.round(nAH/nSH*100):0;
   const tk=nAM>0?m.aprovados/nAM:0,pct=Math.min(h.total/1200*100,100);
   document.getElementById('mbar').style.width=pct+'%';
   document.getElementById('mbar').className='meta-bar'+(pct>=100?' ok':'');
   const pe=document.getElementById('mpct');pe.textContent=pct.toFixed(0)+'%';pe.className='meta-pct'+(pct>=100?' ok':'');
   S('mval',R(h.total));
+  const _mn=d.mesNome||'',_an=d.ano||new Date().getFullYear();
+  S('logo-mes',_mn+' '+_an);S('t-chart-dia','Faturamento por dia — '+_mn);S('t-gastos','Gastos — '+_mn+' '+_an);
+
   S('k1',R(m.total));S('k1s',d.diasComFat+' dias');S('k2',R(m.aprovados));S('k2s',nAM+' aprovados');
   S('k3',R(m.sinais));S('k3s',nSM+' sinais');S('k4',cM+'%');S('k4s',nAM+' / '+nSM);
   S('k5',R(tk));S('k6',R(d.mediaDiaria));S('k6s',d.diasComFat+' dias');
@@ -292,18 +295,18 @@ function render(d){
   if(h.total>=1200){se.textContent='✓ Meta atingida';se.className='h-status ok';}
   else{se.textContent='Faltam '+R(1200-h.total)+' para a meta';se.className='h-status nok';}
   S('hs1',nSH);S('hs2',nAH);S('hs3',R(h.aprovados));
-  S('f0',N(h.sinal_10/10));S('f1',N(h.sinal_19/19.9));S('f2',N(h.sinal_24/24.9));S('f3',N(h.aprov_60/60));S('f4',N(h.aprov_65/65));S('f5',N(h.aprov_70/70));
+  S('f0',N(h.sinal_10/10));S('f1',N(h.sinal_19/19.9));S('f2',N(h.sinal_24/24.9));S('f3',N(h.aprov_60/60));S('f4',N(h.aprov_69/69.9));S('f5',N(h.aprov_75/75));
   S('fs1',nSH);S('fs2',nAH);S('fs3',cH+'%');S('fs4',R(h.total));
   S('m0',N(m.sinal_10/10));S('m0r',R(m.sinal_10));S('m1',N(m.sinal_19/19.9));S('m1r',R(m.sinal_19));S('m2',N(m.sinal_24/24.9));S('m2r',R(m.sinal_24));
   S('m3',nSM);S('m3r',R(m.sinais));S('m4',N(m.aprov_60/60));S('m4r',R(m.aprov_60));
-  S('m5',N(m.aprov_65/65));S('m5r',R(m.aprov_65));S('m6',N(m.aprov_70/70));S('m6r',R(m.aprov_70));
+  S('m5',N(m.aprov_69/69.9));S('m5r',R(m.aprov_69));S('m6',N(m.aprov_75/75));S('m6r',R(m.aprov_75));
   const pl=document.getElementById('plist');
-  const LBL={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_65:'R$65',aprov_70:'R$70+'};
+  const LBL={sinal_19:'R$19,90',sinal_24:'R$24,90',aprov_60:'R$60',aprov_69:'R$69,90',aprov_75:'R$75+'};
   if(!d.ultimosPix?.length){pl.innerHTML='<div class="empty">Nenhum PIX hoje</div>';}
   else pl.innerHTML=d.ultimosPix.slice(0,12).map(p=>{const s=p.categoria==='sinal_19'||p.categoria==='sinal_24';return`<div class="px ${s?'s':'a'}"><span class="px-tag ${s?'ts':'ta'}">${s?'SINAL':'APROV'}</span><span class="px-d">${p.descricao||'PIX'} · ${LBL[p.categoria]||''}</span><span class="px-h">${H(p.horario)}</span><span class="px-v">${R(p.valor)}</span></div>`;}).join('');
   const ctx=document.getElementById('chart').getContext('2d');
   const labels=[],sin=[],apr=[];
-  for(let i=1;i<=d.diaAtual;i++){labels.push(String(i).padStart(2,'0'));const dd=d.porDia[i]||{};sin.push((dd.sinal_19||0)+(dd.sinal_24||0));apr.push((dd.aprov_60||0)+(dd.aprov_65||0)+(dd.aprov_70||0));}
+  for(let i=1;i<=d.diaAtual;i++){labels.push(String(i).padStart(2,'0'));const dd=d.porDia[i]||{};sin.push((dd.sinal_19||0)+(dd.sinal_24||0));apr.push((dd.aprov_60||0)+(dd.aprov_69||0)+(dd.aprov_75||0));}
   if(ch)ch.destroy();
   ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Sinais',data:sin,backgroundColor:'rgba(61,142,255,.45)',borderColor:'#3d8eff',borderWidth:1,borderRadius:3},{label:'Aprovados',data:apr,backgroundColor:'rgba(124,92,252,.45)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10},boxWidth:8,padding:12}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$'+c.raw.toFixed(2)}}},scales:{x:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9}},grid:{color:'#0d0d1a'}},y:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
   S('upd','atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
