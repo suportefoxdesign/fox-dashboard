@@ -1,9 +1,10 @@
-// bridge.js — mesmo contrato e MESMOS TIPOS do Apps Script antigo:
+// bridge.js — mesmo contrato do Apps Script antigo (getValues):
 //   GET /api/bridge?aba=AGOSTO&range=A3:L35 -> { data: [[...]] }
-// Numeros voltam como numero, datas como ISO, vazio como "".
+// Alinhamento vem do CSV (linha do CSV = linha da planilha) e os textos
+// formatados sao convertidos de volta para numero / data ISO.
 
 const SHEET_ID = '1aPgEdIQbPaCOUIieQ3Yb9IS4mMlBKFlXNmtEdBWJISs';
-const TZ_PLANILHA = 'America/Los_Angeles';   // fuso configurado na planilha
+const TZ_PLANILHA = 'America/Los_Angeles';
 
 const GID_MAP = {
   JANEIRO: 1930056113, FEVEREIRO: 139141619, MARCO: 394024566, ABRIL: 1775302632,
@@ -11,6 +12,7 @@ const GID_MAP = {
 };
 const MESES = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO',
                'JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+const ABREV = { jan:0, fev:1, mar:2, abr:3, mai:4, jun:5, jul:6, ago:7, set:8, out:9, nov:10, dez:11 };
 
 function normalizar(s) {
   return String(s || '').trim().toUpperCase()
@@ -18,9 +20,10 @@ function normalizar(s) {
     .replace(/[ÓÒÔÕÖ]/g,'O').replace(/[ÚÙÛÜ]/g,'U').replace(/Ç/g,'C');
 }
 
-function mesAtualBR() {
-  const n = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Sao_Paulo', month: 'numeric' }).format(new Date());
-  return MESES[Number(n) - 1];
+function agoraSP() {
+  const p = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: 'numeric' })
+    .formatToParts(new Date()).reduce((a, x) => (a[x.type] = x.value, a), {});
+  return { ano: Number(p.year), mes: Number(p.month) };
 }
 
 function parseRange(range) {
@@ -30,7 +33,6 @@ function parseRange(range) {
   return { c1: col(m[1]), r1: Number(m[2]), c2: col(m[3]), r2: Number(m[4]) };
 }
 
-// deslocamento (minutos) do fuso da planilha num instante
 function offsetMin(t) {
   const p = new Intl.DateTimeFormat('en-US', {
     timeZone: TZ_PLANILHA, hour12: false,
@@ -42,52 +44,94 @@ function offsetMin(t) {
   return (comoUTC - t) / 60000;
 }
 
-// "Date(2026,7,1)" -> ISO do instante correspondente na planilha
-function dataParaISO(v) {
-  const m = String(v).match(/^Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)$/);
-  if (!m) return String(v);
-  const [y, mes, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
-  const [hh, mm, ss] = [Number(m[4] || 0), Number(m[5] || 0), Number(m[6] || 0)];
-  let t = Date.UTC(y, mes, d, hh, mm, ss);
-  t = Date.UTC(y, mes, d, hh, mm, ss) - offsetMin(t) * 60000;
-  t = Date.UTC(y, mes, d, hh, mm, ss) - offsetMin(t) * 60000;
+function isoDaData(ano, mes, dia) {
+  let t = Date.UTC(ano, mes, dia);
+  t = Date.UTC(ano, mes, dia) - offsetMin(t) * 60000;
+  t = Date.UTC(ano, mes, dia) - offsetMin(t) * 60000;
   return new Date(t).toISOString();
 }
 
-function valorDaCelula(c) {
-  if (!c) return '';
-  if (c.v === null || c.v === undefined || c.v === '') return (c.f === null || c.f === undefined) ? '' : String(c.f);
-  if (typeof c.v === 'number') return c.v;
-  if (typeof c.v === 'boolean') return c.v;
-  if (typeof c.v === 'string' && /^Date\(/.test(c.v)) return dataParaISO(c.v);
-  return c.v;
+function paraNumero(txt) {
+  let t = String(txt).trim();
+  if (!t) return null;
+  let pct = false;
+  if (/%$/.test(t)) { pct = true; t = t.slice(0, -1).trim(); }
+  t = t.replace(/R\$/g, '').replace(/\s/g, '').replace(/ /g, '');
+  if (!/^-?[\d.,]+$/.test(t)) return null;
+  let n;
+  if (t.indexOf(',') > -1) n = parseFloat(t.replace(/\./g, '').replace(',', '.'));
+  else if (/^-?\d{1,3}(\.\d{3})+$/.test(t)) n = parseFloat(t.replace(/\./g, ''));
+  else n = parseFloat(t);
+  if (isNaN(n)) return null;
+  return pct ? n / 100 : n;
 }
 
-async function tabelaGviz(url) {
+function paraData(txt, anoRef) {
+  const t = String(txt).trim().toLowerCase();
+  let m = t.match(/^(\d{1,2})[-\/\s]([a-zç]{3})\.?$/);
+  if (m && ABREV[m[2]] !== undefined) return isoDaData(anoRef, ABREV[m[2]], Number(m[1]));
+  m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if (m) {
+    const ano = Number(m[3]) < 100 ? 2000 + Number(m[3]) : Number(m[3]);
+    return isoDaData(ano, Number(m[2]) - 1, Number(m[1]));
+  }
+  return null;
+}
+
+function converter(txt, anoRef) {
+  if (txt === undefined || txt === null || String(txt) === '') return '';
+  const d = paraData(txt, anoRef);
+  if (d) return d;
+  const n = paraNumero(txt);
+  if (n !== null) return n;
+  return String(txt);
+}
+
+function parseCSV(text) {
+  const rows = [];
+  let cur = '', row = [], inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
+      else cur += ch;
+    } else if (ch === '"') inQ = true;
+    else if (ch === ',') { row.push(cur); cur = ''; }
+    else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+    else if (ch !== '\r') cur += ch;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+function pareceCSV(t) {
+  if (!t) return false;
+  const h = t.slice(0, 200);
+  if (/^\s*[<{]/.test(h)) return false;
+  if (/google\.visualization|invalid_query|Bad Request/i.test(h)) return false;
+  return true;
+}
+
+async function baixar(url) {
   try {
     const r = await fetch(url);
     if (!r.ok) return null;
     const t = await r.text();
-    const i = t.indexOf('('), f = t.lastIndexOf(')');
-    if (i < 0 || f <= i) return null;
-    const j = JSON.parse(t.slice(i + 1, f));
-    if (j.status !== 'ok' || !j.table) return null;
-    return j.table;
+    return pareceCSV(t) ? t : null;
   } catch (e) { return null; }
 }
 
-async function tabelaDaAba(aba) {
+async function csvDaAba(aba) {
   const k = normalizar(aba);
-  const base = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:json&headers=0';
   if (GID_MAP[k]) {
-    const t = await tabelaGviz(base + '&gid=' + GID_MAP[k]);
-    if (t) return t;
+    const c = await baixar('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + GID_MAP[k]);
+    if (c) return c;
   }
   if (MESES.indexOf(k) === -1) return null;
   const nomes = k === 'MARCO' ? ['MAR%C3%87O', 'MARCO'] : [encodeURIComponent(aba), k];
   for (const n of nomes) {
-    const t = await tabelaGviz(base + '&sheet=' + n);
-    if (t) return t;
+    const c = await baixar('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&headers=0&sheet=' + n);
+    if (c) return c;
   }
   return null;
 }
@@ -97,26 +141,22 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   try {
     const url = new URL(req.url, 'http://x');
-    const aba = url.searchParams.get('aba') || mesAtualBR();
+    const hoje = agoraSP();
+    const aba = url.searchParams.get('aba') || MESES[hoje.mes - 1];
     const range = url.searchParams.get('range') || 'A3:L35';
 
     const r = parseRange(range);
     if (!r) return res.status(200).json({ erro: 'range invalido: ' + range });
 
-    const tabela = await tabelaDaAba(aba);
-    if (!tabela) return res.status(200).json({ erro: 'aba nao encontrada: ' + aba });
+    const csv = await csvDaAba(aba);
+    if (!csv) return res.status(200).json({ erro: 'aba nao encontrada: ' + aba });
 
-    if (url.searchParams.get('debug')) {
-      return res.status(200).json({ nh: tabela.parsedNumHeaders, nRows: (tabela.rows||[]).length, r0: (tabela.rows||[])[0], r1: (tabela.rows||[])[1] });
-    }
-
-    const linhas = tabela.rows || [];
-    const desloc = Number(tabela.parsedNumHeaders || 0);
+    const linhas = parseCSV(csv);
     const data = [];
     for (let L = r.r1; L <= r.r2; L++) {
-      const cs = (linhas[L - 1 - desloc] && linhas[L - 1 - desloc].c) || [];
+      const orig = linhas[L - 1] || [];
       const saida = [];
-      for (let C = r.c1; C <= r.c2; C++) saida.push(valorDaCelula(cs[C - 1]));
+      for (let C = r.c1; C <= r.c2; C++) saida.push(converter(orig[C - 1], hoje.ano));
       data.push(saida);
     }
     return res.status(200).json({ data });
