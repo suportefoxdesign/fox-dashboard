@@ -55,7 +55,8 @@ function dataParaISO(v) {
 }
 
 function valorDaCelula(c) {
-  if (!c || c.v === null || c.v === undefined || c.v === '') return '';
+  if (!c) return '';
+  if (c.v === null || c.v === undefined || c.v === '') return (c.f === null || c.f === undefined) ? '' : String(c.f);
   if (typeof c.v === 'number') return c.v;
   if (typeof c.v === 'boolean') return c.v;
   if (typeof c.v === 'string' && /^Date\(/.test(c.v)) return dataParaISO(c.v);
@@ -106,12 +107,11 @@ export default async function handler(req, res) {
     if (!tabela) return res.status(200).json({ erro: 'aba nao encontrada: ' + aba });
 
     if (url.searchParams.get('debug')) {
-      return res.status(200).json({ cols: (tabela.cols||[]).map(c=>c.label), nRows: (tabela.rows||[]).length, r0: (tabela.rows||[])[0], r1: (tabela.rows||[])[1] });
+      return res.status(200).json({ nh: tabela.parsedNumHeaders, nRows: (tabela.rows||[]).length, r0: (tabela.rows||[])[0], r1: (tabela.rows||[])[1] });
     }
 
     const linhas = tabela.rows || [];
-    const temHeader = (tabela.cols || []).some(c => c.label && String(c.label).trim() !== '');
-    const desloc = temHeader ? 1 : 0;
+    const desloc = Number(tabela.parsedNumHeaders || 0);
     const data = [];
     for (let L = r.r1; L <= r.r2; L++) {
       const cs = (linhas[L - 1 - desloc] && linhas[L - 1 - desloc].c) || [];
