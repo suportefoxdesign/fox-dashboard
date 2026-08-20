@@ -18,6 +18,11 @@ const ABREV_DO_MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out
 // planilha Fox: F=19,90  G=24,90  H=10   ->  app espera F=10  G=19,90  H=24,90
 const ORDEM = { 6: 8, 7: 6, 8: 7 };
 
+// A planilha da Fox nao tem cabecalho: o dia 1 fica na linha 1.
+// O app espera o formato da Alien (linha 3 = cabecalho, dia 1 na linha 4).
+const DESLOC = 3;
+const CABECALHO = ['DATA','TRÁFEGO','SAÍDA','DESPESAS','FATURAMENTO','10 FECHADO','19 FECHADO','24 FECHADO','60 APROVA.','69,90 APROVA','75+ APROVA','LUCRO'];
+
 function normalizar(s) {
   return String(s || '').trim().toUpperCase()
     .replace(/[ÁÀÂÃÄ]/g,'A').replace(/[ÉÈÊË]/g,'E').replace(/[ÍÌÎÏ]/g,'I')
@@ -177,11 +182,15 @@ export default async function handler(req, res) {
     const linhas = parseCSV(csv);
     const data = [];
     for (let L = r.r1; L <= r.r2; L++) {
-      const orig = linhas[L - 1] || [];
       const saida = [];
-      for (let C = r.c1; C <= r.c2; C++) {
-        const fonte = ORDEM[C] || C;
-        saida.push(converter(orig[fonte - 1], hoje.ano));
+      if (L === 3) {
+        for (let C = r.c1; C <= r.c2; C++) saida.push(CABECALHO[C - 1] || '');
+      } else {
+        const orig = (L <= 2 ? linhas[L - 1] : linhas[L - 1 - DESLOC]) || [];
+        for (let C = r.c1; C <= r.c2; C++) {
+          const fonte = ORDEM[C] || C;
+          saida.push(converter(orig[fonte - 1], hoje.ano));
+        }
       }
       data.push(saida);
     }
