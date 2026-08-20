@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Alien Design Dashboard</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060A0F;--panel:#0D1117;--panel2:#0A0F14;--border:#1a2535;--border-glow:#1e3a2a;
+  --green:#3DFF8C;--green2:#1D9E75;--green-dim:#1d7a48;--green-bg:rgba(61,255,140,0.06);
+  --red:#E24B4A;--amber:#F59E0B;--blue:#60a5fa;--purple:#818cf8;--cyan:#22d3ee;
+  --txt:#F0F4F8;--mut:#5A6A7A;--mut2:#8B93A1;--radius:14px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh}
+.money{font-family:'Space Grotesk',monospace;font-variant-numeric:tabular-nums}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;background-image:radial-gradient(ellipse at 50% 0%,rgba(61,255,140,0.08) 0%,transparent 60%)}
+#loginScreen.hidden{display:none}
+#loginScreen .logo{font-family:'Space Grotesk';font-size:32px;font-weight:700;margin-bottom:4px;letter-spacing:-1px}
+#loginScreen .logo span{color:var(--green)}
+#loginScreen .sub{color:var(--mut2);font-size:13px;margin-bottom:40px}
+#loginScreen .field{width:100%;max-width:340px;position:relative;margin-bottom:12px}
+#loginScreen .field label{display:block;font-size:11px;color:var(--mut2);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+#loginScreen input{width:100%;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-size:15px;padding:14px 16px;outline:none;font-family:'Inter';transition:border-color .2s}
+#loginScreen input:focus{border-color:var(--green)}
+#loginScreen .btn-login{width:100%;max-width:340px;background:var(--green);color:#030d07;border:none;border-radius:var(--radius-sm);font-weight:700;font-size:15px;padding:16px;cursor:pointer;font-family:'Space Grotesk';letter-spacing:.5px;margin-top:8px;transition:opacity .2s}
+#loginScreen .btn-login:hover{opacity:.9}
+#loginScreen .err{color:var(--red);font-size:12px;margin-top:10px;display:none;text-align:center}
+.login-avatars{display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;justify-content:center}
+.login-av{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;padding:10px 14px;border-radius:var(--radius-sm);border:1px solid transparent;transition:all .2s}
+.login-av:hover,.login-av.sel{border-color:var(--green);background:var(--green-bg)}
+.login-av .av-circle{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-family:'Space Grotesk';font-size:18px;color:#fff}
+.login-av .av-name{font-size:11px;color:var(--mut2)}
+.login-av.sel .av-name{color:var(--green)}
+
+/* TOPBAR */
+.topbar{background:rgba(6,10,15,.92);border-bottom:1px solid var(--border);padding:0 28px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:0;backdrop-filter:blur(20px)}
+.brand{display:flex;align-items:center;gap:14px;padding:14px 0;margin-right:32px;flex-shrink:0}
+.brand img{height:44px;width:auto;filter:drop-shadow(0 0 8px rgba(61,255,140,.3))}
+.brand-name{font-family:'Space Grotesk';font-size:16px;font-weight:700;letter-spacing:-.3px}
+.brand-name span{color:var(--green)}
+.brand-sub{font-size:11px;color:var(--mut);margin-top:2px}
+.nav{display:flex;gap:0;flex:1;overflow-x:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{background:none;border:none;color:var(--mut);font-size:12px;padding:18px 18px;cursor:pointer;border-bottom:2px solid transparent;font-family:'Inter';font-weight:500;transition:color .15s;white-space:nowrap;flex-shrink:0;letter-spacing:.3px;text-transform:uppercase}
+.nav-btn:hover{color:var(--txt)}
+.nav-btn.active{color:var(--green);border-bottom-color:var(--green)}
+.status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);margin-left:auto;padding:10px 0;flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{50%{opacity:.3}}
+
+/* PAGES */
+.page{display:none;padding:24px 28px;max-width:1400px;margin:0 auto}
+.page.active{display:block}
+@media(max-width:700px){.page{padding:16px}}
+
+/* SECTION HEADER */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-family:'Space Grotesk';font-size:22px;font-weight:700;letter-spacing:-.5px}
+.section-badge{font-size:11px;color:var(--green);background:var(--green-bg);border:1px solid rgba(61,255,140,.2);border-radius:999px;padding:5px 14px;font-weight:600}
+
+/* CARDS */
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(61,255,140,.15),transparent)}
+.card-title{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px;font-weight:600}
+
+/* KPI GRID */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.kcard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;position:relative;overflow:hidden;transition:border-color .2s}
+.kcard::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent,var(--green)),transparent);opacity:.35}
+.kcard .lbl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
+.kcard .val{font-size:20px;font-weight:700;line-height:1;font-family:'Space Grotesk'}
+.kcard .sub{font-size:10px;color:var(--mut);margin-top:4px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0a1a10 0%,var(--panel) 70%);border:1px solid var(--border-glow);border-radius:var(--radius);padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(61,255,140,.1) 0%,transparent 70%);pointer-events:none}
+.hero-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:8px}
+.hero-val{font-size:48px;font-weight:700;color:var(--green);text-shadow:0 0 40px rgba(61,255,140,.35);font-family:'Space Grotesk';letter-spacing:-2px;line-height:1}
+.meta-bar{margin-top:16px;background:#080d12;border-radius:999px;height:8px;border:1px solid var(--border)}
+.meta-fill{height:6px;margin:1px;background:linear-gradient(90deg,var(--green-dim),var(--green));border-radius:999px;width:0%;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.meta-txt{display:flex;justify-content:space-between;font-size:10px;color:var(--mut);margin-top:6px}
+
+/* HOJE GRID */
+.hoje-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+@media(max-width:600px){.hoje-grid{grid-template-columns:1fr 1fr}}
+.hcard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px}
+.hcard .hl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-weight:600}
+.hcard .hv{font-size:22px;font-weight:700;font-family:'Space Grotesk';line-height:1}
+.hcard .hs{font-size:10px;color:var(--mut);margin-top:4px}
+
+/* FUNIL */
+.funil-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:12px 0}
+@media(max-width:600px){.funil-grid{grid-template-columns:repeat(3,1fr)}}
+.funil-item{text-align:center;background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 6px}
+.funil-val{font-size:24px;font-weight:700;font-family:'Space Grotesk';margin-bottom:3px}
+.funil-lbl{font-size:9px;color:var(--mut);line-height:1.4;text-transform:uppercase;letter-spacing:.5px}
+.funil-footer{display:flex;gap:20px;margin-top:12px;font-size:12px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border)}
+
+/* CHART */
+.chart-wrap{position:relative;width:100%;height:220px;margin:8px 0}
+.chart-wrap-lg{position:relative;width:100%;height:260px;margin:8px 0}
+
+/* LEGEND */
+.legend{display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--mut);flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend .sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.legend .ln{width:16px;height:2px;flex-shrink:0}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:9px;color:var(--mut);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border);text-align:right;cursor:pointer;user-select:none;white-space:nowrap;text-transform:uppercase;letter-spacing:.5px}
+.tbl th:first-child{text-align:left}
+.tbl th:hover{color:var(--txt)}
+.tbl tbody tr:hover td{background:#0a0f15}
+.tbl td{padding:10px 14px;border-bottom:.5px solid #0d1520;color:var(--txt);text-align:right;font-family:'Space Grotesk';font-size:12px}
+.tbl td:first-child{text-align:left;color:var(--mut);font-family:'Inter'}
+.meta-ok td:first-child{color:var(--green)!important}
+
+/* XTBL (fechamento) */
+.xtbl-wrap{overflow-x:auto}
+.xtbl{width:100%;border-collapse:collapse;font-size:11px;min-width:900px}
+.xtbl thead th{background:rgba(61,255,140,.05);color:var(--green);font-size:9px;font-weight:700;padding:9px 10px;text-align:center;border:.5px solid var(--border-glow);white-space:nowrap;letter-spacing:.5px;text-transform:uppercase}
+.xtbl thead th:first-child{text-align:left}
+.xtbl tbody tr{border-bottom:.5px solid #0d1520}
+.xtbl tbody tr:hover td{background:#0a0f14}
+.xtbl td{padding:7px 10px;text-align:right;font-size:11px;font-family:'Space Grotesk'}
+.xtbl td:first-child{text-align:left;font-weight:500;color:var(--mut);font-family:'Inter'}
+.xtbl .row-total td{background:rgba(61,255,140,.04);font-weight:700;font-size:12px;border-top:1px solid var(--border-glow);color:var(--green)}
+.xtbl .row-total td:first-child{color:var(--green)}
+.xtbl .row-media td{background:#080d12;font-size:10px;color:var(--mut);border-top:.5px solid var(--border)}
+
+/* BAR MINI */
+.bar-mini{height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden}
+.bar-mini-fill{height:4px;border-radius:2px}
+
+/* TWO COL */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:700px){.two{grid-template-columns:1fr}}
+
+/* SÓCIOS */
+.socio-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--border)}
+.socio-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green-dim),var(--green2));display:grid;place-items:center;font-weight:700;font-family:'Space Grotesk';color:#fff;font-size:15px;flex-shrink:0}
+.socio-nm{font-weight:600;font-size:14px;font-family:'Space Grotesk'}
+.socio-pc{font-size:11px;color:var(--mut);margin-top:2px}
+.socio-vl{margin-left:auto;font-family:'Space Grotesk';font-weight:700;color:var(--green);font-size:18px}
+
+/* CAMP LIST */
+.camp-item{padding:14px 0;border-bottom:.5px solid var(--border)}
+.camp-item:last-child{border-bottom:none}
+
+/* COLORS */
+.green{color:var(--green)}.green2{color:var(--green2)}.red{color:var(--red)}.amber{color:var(--amber)}.blue{color:var(--blue)}.purple{color:var(--purple)}.mut{color:var(--mut)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="logo">ALIEN<span>PIX</span> 👽</div>
+  <div class="sub">Dashboard · Equipe Alien Design</div>
+  <div class="login-avatars" id="avatarList"></div>
+  <div class="field"><label>Senha</label><input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"></div>
+  <button class="btn-login" onclick="doLogin()">Entrar</button>
+  <div class="err" id="loginErr">Senha incorreta</div>
+</div>
+
+<!-- APP -->
+<div id="appShell" style="display:none">
+<div class="topbar">
+  <div class="brand">
+    <img src="/logo.png" alt="Alien Design">
+    <div>
+      <div class="brand-name">Alien<span>PIX</span></div>
+      <div class="brand-sub" id="mes-titulo">carregando…</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTab('hoje',this)">Hoje</button>
+    <button class="nav-btn" onclick="goTab('ads',this)">Meta Ads</button>
+    <button class="nav-btn" onclick="goTab('historico',this)">Histórico</button>
+    <button class="nav-btn" onclick="goTab('insights',this)">Insights</button>
+    <button class="nav-btn" onclick="goTab('fechamento',this)">Fechamento</button>
+  </nav>
+  <div class="status" style="gap:10px">
+    <span id="headerUser" style="font-size:12px;color:var(--mut2)"></span>
+    <button onclick="doLogout()" style="font-size:10px;color:var(--mut);background:none;border:1px solid var(--border);padding:4px 10px;border-radius:8px;cursor:pointer;font-family:'Inter'">Sair</button>
+    <div class="dot"></div><span id="ts">—</span>
+  </div>
+</div>
+
+<!-- HOJE -->
+<div id="tab-hoje" class="page active">
+  <div class="section-hdr"><div class="section-title">Hoje</div><div class="section-badge" id="hoje-date">—</div></div>
+  <div id="hoje-hero"></div>
+  <div class="hoje-grid" id="hoje-grid"></div>
+  <div class="kgrid" id="hoje-kpis"></div>
+  <div class="card" id="hoje-funil"></div>
+  <div class="card" id="hoje-ads"></div>
+</div>
+
+<!-- ADS -->
+<div id="tab-ads" class="page">
+  <div class="section-hdr"><div class="section-title">Meta Ads</div><div class="section-badge" id="ads-badge">—</div></div>
+  <div class="kgrid" id="ads-kpis"></div>
+  <div class="card">
+    <div class="card-title">CPR por dia</div>
+    <div class="legend"><span><div class="sq" style="background:var(--red)"></div>CPR</span><span><div class="sq" style="background:#818cf844"></div>Conversas</span></div>
+    <div class="chart-wrap-lg"><canvas id="chart-cpr"></canvas></div>
+  </div>
+  <div class="two">
+    <div class="card"><div class="card-title">Gasto diário</div><div class="chart-wrap"><canvas id="chart-gasto"></canvas></div></div>
+    <div class="card"><div class="card-title">Distribuição CPR</div><div id="cpr-dist" style="padding-top:6px"></div></div>
+  </div>
+  <div class="card"><div class="card-title">Campanhas — ranking por conversas</div><div id="camp-list"></div></div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="tab-historico" class="page">
+  <div class="section-hdr"><div class="section-title">Histórico</div><div class="section-badge" id="hist-badge">—</div></div>
+  <div class="card">
+    <div class="card-title">Faturamento diário + lucro</div>
+    <div class="legend"><span><div class="sq" style="background:var(--green)"></div>Fat ≥ meta</span><span><div class="sq" style="background:var(--blue)"></div>Lucro</span><span><div class="ln" style="background:var(--red)"></div>Meta R$700</span></div>
+    <div class="chart-wrap-lg"><canvas id="chart-fat"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Funil — fechados vs aprovados</div>
+    <div class="legend"><span><div class="sq" style="background:var(--blue)"></div>Fechados</span><span><div class="sq" style="background:var(--green)"></div>Aprovados</span><span><div class="ln" style="background:var(--amber)"></div>Conv %</span></div>
+    <div class="chart-wrap"><canvas id="chart-funil"></canvas></div>
+  </div>
+  <div class="card" style="overflow-x:auto">
+    <div class="card-title">Dias do mês</div>
+    <table class="tbl" id="hist-tbl"></table>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div id="tab-insights" class="page">
+  <div class="section-hdr"><div class="section-title">Insights</div></div>
+  <div class="kgrid" id="insights-kpis"></div>
+  <div class="two">
+    <div class="card"><div class="card-title">Melhores dias</div><div id="top-dias"></div></div>
+    <div class="card"><div class="card-title">Piores dias</div><div id="bot-dias"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Correlação CPR → faturamento D+1</div>
+    <div class="chart-wrap"><canvas id="chart-corr"></canvas></div>
+    <div id="corr-insight" style="font-size:12px;color:var(--mut);margin-top:8px"></div>
+  </div>
+  <div id="insights-list"></div>
+</div>
+
+<!-- FECHAMENTO -->
+<div id="tab-fechamento" class="page">
+  <div class="section-hdr"><div class="section-title">Fechamento</div><div class="section-badge" id="fech-badge">—</div></div>
+  <div class="kgrid" id="fech-kpis"></div>
+  <div class="two">
+    <div class="card" style="border-color:var(--border-glow)"><div class="card-title" style="color:var(--green)">Divisão dos sócios</div><div id="fech-socios"></div></div>
+    <div class="card"><div class="card-title">Projeção de fechamento</div><div id="fech-proj"></div></div>
+  </div>
+  <div class="two">
+    <div class="card" style="border-left:2px solid var(--red)"><div class="card-title" style="color:var(--red)">Pontos de melhoria</div><div id="fech-melhorias"></div></div>
+    <div class="card" style="border-left:2px solid var(--amber)"><div class="card-title" style="color:var(--amber)">Resumo executivo</div><div id="fech-resumo"></div></div>
+  </div>
+  <div class="card" style="border-left:2px solid #BA7517">
+    <div class="card-title" style="color:#BA7517">FUNDO ALIEN</div>
+    <div id="fundo-alien"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Tabela mensal</div>
+    <div class="xtbl-wrap"><table class="xtbl" id="fech-tbl"></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Anotações do fechamento</div>
+    <textarea id="fech-notas" placeholder="Observações, metas para o próximo mês…" style="width:100%;min-height:160px;background:var(--panel2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--txt);font-family:'Inter';font-size:13px;padding:14px;resize:vertical;outline:none;line-height:1.6;transition:border-color .2s" onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor=''" oninput="salvarNotas()"></textarea>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+      <span id="notas-status" style="font-size:11px;color:var(--mut)">Autossalvo no navegador</span>
+      <button onclick="limparNotas()" style="font-size:11px;color:var(--mut);background:none;border:1px solid var(--border);padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Inter'">Limpar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var B='/api/bridge',M='/api/meta',META=700;
+var charts={};
+var NOTAS_KEY='alien_notas';
+
+// ===== LOGIN =====
+var SENHA='f5';
+var USERS=[{id:'diego',nome:'Diego',ini:'D',cor:'#3DFF8C'},{id:'gui',nome:'Gui',ini:'G',cor:'#60a5fa'},{id:'peter',nome:'Peter',ini:'P',cor:'#818cf8'},{id:'franca',nome:'França',ini:'F',cor:'#F59E0B'}];
+var userAtual=null;
+
+function renderAvatars(){
+  var saved=localStorage.getItem('alien_user');
+  var list=document.getElementById('avatarList');
+  if(!list)return;
+  list.innerHTML=USERS.map(function(u){
+    var sel=saved===u.id?'sel':'';
+    return '<div class="login-av '+sel+'" onclick="selectUser(\''+u.id+'\')" id="av-'+u.id+'">'+
+      '<div class="av-circle" style="background:'+u.cor+'22;border:2px solid '+u.cor+'40;color:'+u.cor+'">'+u.ini+'</div>'+
+      '<div class="av-name">'+u.nome+'</div>'+
+    '</div>';
+  }).join('');
+  if(saved)selectUser(saved,false);
+}
+
+function selectUser(id,focus){
+  document.querySelectorAll('.login-av').forEach(function(el){el.classList.remove('sel');});
+  var el=document.getElementById('av-'+id);
+  if(el)el.classList.add('sel');
+  userAtual=USERS.find(function(u){return u.id===id;});
+  localStorage.setItem('alien_user',id);
+  if(focus!==false){var p=document.getElementById('loginPass');if(p)p.focus();}
+}
+
+function doLogin(){
+  var err=document.getElementById('loginErr');
+  if(!userAtual){
+    err.textContent='Selecione seu nome acima';err.style.display='block';
+    setTimeout(function(){err.style.display='none';},3000);return;
+  }
+  var pass=document.getElementById('loginPass').value;
+  if(pass!==SENHA){
+    err.textContent='Senha incorreta';err.style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+    setTimeout(function(){err.style.display='none';},3000);return;
+  }
+  localStorage.setItem('alien_logado','1');
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('appShell').style.display='';
+  var hu=document.getElementById('headerUser');
+  if(hu)hu.textContent=userAtual.nome;
+  init();
+}
+
+function doLogout(){
+  localStorage.removeItem('alien_logado');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('appShell').style.display='none';
+  document.getElementById('loginPass').value='';
+}
+
+// Enter no campo de senha
+document.addEventListener('DOMContentLoaded',function(){
+  renderAvatars();
+  var inp=document.getElementById('loginPass');
+  if(inp)inp.addEventListener('keydown',function(e){if(e.key==='Enter')doLogin();});
+  // Auto-login se ja estava logado
+  if(localStorage.getItem('alien_logado')==='1'){
+    var savedUser=USERS.find(function(u){return u.id===localStorage.getItem('alien_user');});
+    if(savedUser){
+      userAtual=savedUser;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('appShell').style.display='';
+      var hu=document.getElementById('headerUser');
+      if(hu)hu.textContent=userAtual.nome;
+    }
+  }
+});
+
+function goTab(n,b){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  b.classList.add('active');
+}
+const fmt=v=>'R$'+Math.round(v).toLocaleString('pt-BR');
+const fmtD=v=>'R$'+(+v||0).toFixed(2).replace('.',',');
+const cprClr=c=>c>0&&c<=2.49?'var(--green)':c>3?'var(--red)':'var(--amber)';
+function kc(l,v,s,cls,accent){
+  return `<div class="kcard" style="${accent?'--accent:'+accent:''}"><div class="lbl">${l}</div><div class="val${cls?' '+cls:''}">${v}</div><div class="sub">${s}</div></div>`;
+}
+function mkChart(id,cfg){if(charts[id])charts[id].destroy();var c=document.getElementById(id);if(c)charts[id]=new Chart(c,cfg);}
+
+async function init(){
+  try{
+    const MESES_PT=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const MESES_ABA=['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+    const MESES_ABV=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    const agora=new Date(new Date().toLocaleString('en-US',{timeZone:'America/Sao_Paulo'}));
+    const mesIdx=agora.getMonth(),ANO=agora.getFullYear();
+    const ABA=MESES_ABA[mesIdx],MES_NOME=MESES_PT[mesIdx],MES_ABV=MESES_ABV[mesIdx];
+    const DIAS_MES=new Date(ANO,mesIdx+1,0).getDate();
+    const hoje=agora.getDate();
+
+    document.getElementById('mes-titulo').textContent=MES_NOME+' '+ANO;
+    document.getElementById('hoje-date').textContent=hoje+' de '+MES_NOME;
+
+    const [r1,r2,r3,r4,r5]=await Promise.all([
+      fetch(B+'?aba='+ABA+'&range=A3:L35').then(r=>r.json()),
+      fetch(B+'?aba='+ABA+'&range=M1:O1').then(r=>r.json()),
+      fetch(M+'?tipo=resumo').then(r=>r.json()).catch(()=>null),
+      fetch(M+'?tipo=mes_diario').then(r=>r.json()).catch(()=>null),
+      fetch(M+'?tipo=campanhas').then(r=>r.json()).catch(()=>null),
+    ]);
+    const rows=r1.data||[];
+    const pixRow=(r2.data&&r2.data[0])||[];
+    let lastVal=parseFloat(pixRow[0])||0;
+    let lastHora=String(pixRow[1]||'');
+    let lastTipo=String(pixRow[2]||'');
+    if(!lastHora||lastHora==='0'||lastHora.toLowerCase().includes('num'))lastHora='—';
+    if(!lastTipo||lastTipo==='0'||lastTipo.toLowerCase().includes('num'))lastTipo='—';
+    const mH=(r3&&r3.hoje)||{gasto:0,resultados:0,cpr:0};
+    const mM=(r3&&r3.mes)||{gasto:0,resultados:0,cpr:0};
+    const metaDias=(r4&&r4.dias)||[];
+    const campanhas=(r5&&r5.campanhas)||[];
+
+    let tf=0,tt=0,tsaida=0,tdp=0,t10=0,t19=0,t24=0,t70=0,t75=0,t80=0;
+    let dias=[];
+    rows.slice(1).forEach((r,i)=>{
+      const dia=i+1;
+      const saida=parseFloat(r[2])||0,dp=parseFloat(r[3])||0;
+      if(dia<=31){tsaida+=saida;tdp+=dp;}
+      if(dia>hoje)return;
+      const f=parseFloat(r[4])||0,t=parseFloat(r[1])||0;
+      const c10=parseFloat(r[5])||0,c19=parseFloat(r[6])||0,c24=parseFloat(r[7])||0;
+      const c70=parseFloat(r[8])||0,c75=parseFloat(r[9])||0,c80=parseFloat(r[10])||0;
+      const fech=c10+c19+c24,aprov=c70+c75+c80;
+      const md=metaDias.find(m=>parseInt(m.data.split('-')[2])===dia);
+      const obj={dia,f,t,saida,dp,l:f-t-saida-dp,fech:Math.round(fech),aprov:Math.round(aprov),c10:Math.round(c10),c19:Math.round(c19),c24:Math.round(c24),c70:Math.round(c70),c75:Math.round(c75),c80:Math.round(c80),gasto:md?md.gasto:0,convs:md?md.resultados:0,cpr:md?md.cpr:0};
+      if(t>0)tt+=t;
+      if(f>0||fech>0||aprov>0)dias.push(obj);
+      if(f>0){tf+=f;t10+=c10;t19+=c19;t24+=c24;t70+=c70;t75+=c75;t80+=c80;}
+    });
+    const lucro=tf-tt-tsaida-tdp;
+    const diaComFat=dias.filter(d=>d.f>0).length||1;
+    const tsFech=t10+t19+t24,tsAprov=t70+t75+t80;
+    const conv=tsFech>0?Math.round(tsAprov/tsFech*100):0;
+    const roiReal=tt>0?Math.round((tf-tt)/tt*100):0;
+    const ticketMed=tsAprov>0?tf/tsAprov:0;
+    const cpa=tsAprov>0?tt/tsAprov:0;
+    let streak=0;
+    for(let si=dias.length-1;si>=0;si--){if(dias[si].f>=META)streak++;else break;}
+    const diasAcima=dias.filter(d=>d.f>=META).length;
+    const hojeD=dias[dias.length-1]||{};
+    const ontemD=dias.length>1?dias[dias.length-2]:{};
+    const delta=(hojeD.f||0)-(ontemD.f||0);
+    const hFech=hojeD.fech||0,hAprov=hojeD.aprov||0;
+    const hConv=hFech>0?Math.round(hAprov/hFech*100):0;
+    const metaDiff=(hojeD.f||0)-META;
+    const pct=Math.min(100,Math.round(((hojeD.f||0)/META)*100));
+
+    document.getElementById('ts').textContent=agora.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+    // HOJE
+    document.getElementById('hoje-hero').innerHTML=`
+      <div class="hero">
+        <div class="hero-lbl">Faturamento de hoje</div>
+        <div class="hero-val money">${fmtD(hojeD.f||0)}</div>
+        <div style="font-size:13px;margin-top:8px;color:${metaDiff>=0?'var(--green)':'var(--red)'}">${metaDiff>=0?'✓ R$'+Math.round(metaDiff)+' acima da meta':'↓ R$'+Math.abs(Math.round(metaDiff))+' abaixo da meta (R$700)'}</div>
+        <div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div>
+        <div class="meta-txt"><span>${pct}%</span><span>Meta R$ 700/dia</span></div>
+      </div>`;
+
+    document.getElementById('hoje-grid').innerHTML=`
+      <div class="hcard"><div class="hl">Fat. mês</div><div class="hv money green">${fmt(tf)}</div><div class="hs">acumulado</div></div>
+      <div class="hcard"><div class="hl">Lucro mês</div><div class="hv money ${lucro>=0?'green':'red'}">${fmt(lucro)}</div><div class="hs">operacional</div></div>
+      <div class="hcard"><div class="hl">vs ontem</div><div class="hv money ${delta>=0?'green':'red'}">${delta>=0?'+':''}${fmt(delta)}</div><div class="hs">diferença</div></div>`;
+
+    document.getElementById('hoje-kpis').innerHTML=
+      kc('Tráfego hoje',fmtD(mH.gasto),'Meta Ads','red','var(--red)')+
+      kc('Aprovados hoje',String(hAprov),'conv '+hConv+'%','green','var(--green)')+
+      kc('Fechados hoje',String(hFech),'sinais','blue','var(--blue)')+
+      kc('Último PIX',lastVal>0?fmtD(lastVal):'—',lastHora,'green');
+
+    document.getElementById('hoje-funil').innerHTML=`
+      <div class="card-title" style="color:var(--amber)">Funil do dia</div>
+      <div class="funil-grid">
+        <div class="funil-item"><div class="funil-val blue">${hojeD.c10||0}</div><div class="funil-lbl">R$10<br>fechado</div></div>
+        <div class="funil-item"><div class="funil-val purple">${hojeD.c19||0}</div><div class="funil-lbl">R$19,90<br>fechado</div></div>
+        <div class="funil-item"><div class="funil-val" style="color:#a78bfa">${hojeD.c24||0}</div><div class="funil-lbl">R$24<br>fechado</div></div>
+        <div class="funil-item"><div class="funil-val green">${hojeD.c70||0}</div><div class="funil-lbl">R$70<br>aprovado</div></div>
+        <div class="funil-item"><div class="funil-val green">${hojeD.c75||0}</div><div class="funil-lbl">R$75<br>aprovado</div></div>
+        <div class="funil-item"><div class="funil-val green">${hojeD.c80||0}</div><div class="funil-lbl">R$80+<br>aprovado</div></div>
+      </div>
+      <div class="funil-footer">
+        <span>Fechados: <b class="blue">${hFech}</b></span>
+        <span>Aprovados: <b class="green">${hAprov}</b></span>
+        <span>Conv: <b style="color:${hConv>=50?'var(--green)':'var(--amber)'}">${hConv}%</b></span>
+        ${lastVal>0?`<span>Último: <b class="green">${fmtD(lastVal)}${lastHora!=='—'?' · '+lastHora:''}</b></span>`:''}
+      </div>`;
+
+    document.getElementById('hoje-ads').innerHTML=`
+      <div class="card-title" style="color:#1877f2">▲ Meta Ads — Alien Design</div>
+      <div class="kgrid">
+        ${kc('Gasto hoje',fmtD(mH.gasto),'tráfego pago','red','var(--red)')}
+        ${kc('CPR hoje','R$'+(mH.cpr||0).toFixed(2).replace('.',','),'por conversa',mH.cpr>0&&mH.cpr<=2.49?'green':mH.cpr>3?'red':'amber')}
+        ${kc('Conversas hoje',String(mH.resultados||0),'iniciadas','blue','var(--blue)')}
+        ${kc('Gasto mês',fmtD(mM.gasto),'acumulado '+MES_ABV,'red')}
+        ${kc('CPR mês','R$'+(mM.cpr||0).toFixed(2).replace('.',','),'média '+MES_ABV,mM.cpr>0&&mM.cpr<=2.49?'green':mM.cpr>3?'red':'amber')}
+        ${kc('Conversas mês',String(mM.resultados||0),'total '+MES_ABV,'blue')}
+      </div>`;
+
+    // ADS
+    const diasComMeta=metaDias.filter(d=>d.cpr>0);
+    const cprBaixo=diasComMeta.filter(d=>d.cpr<2).length;
+    const cprBom=diasComMeta.filter(d=>d.cpr>=2&&d.cpr<2.5).length;
+    const cprAtencao=diasComMeta.filter(d=>d.cpr>=2.5&&d.cpr<3).length;
+    const cprCritico=diasComMeta.filter(d=>d.cpr>=3).length;
+    document.getElementById('ads-badge').textContent='CPR '+fmtD(mM.cpr);
+    document.getElementById('ads-kpis').innerHTML=
+      kc('CPR médio mês',fmtD(mM.cpr),'custo por conversa',mM.cpr>0&&mM.cpr<=2.49?'green':mM.cpr>3?'red':'amber')+
+      kc('Total conversas',String(mM.resultados||0),'iniciadas no mês','blue','var(--blue)')+
+      kc('Gasto total Meta',fmtD(mM.gasto),'tráfego pago','red','var(--red)')+
+      kc('Conv/R$1','R$1 → '+(mM.gasto>0?(mM.resultados/mM.gasto).toFixed(1):'0')+' conv','eficiência')+
+      kc('Dias CPR ótimo',cprBaixo+' dias','CPR < R$2,00','green','var(--green)')+
+      kc('Dias CPR crítico',cprCritico+' dias','CPR > R$3,00',cprCritico>3?'red':'amber');
+
+    const lblsMeta=metaDias.map(d=>parseInt(d.data.split('-')[2])+'/'+MES_ABV);
+    mkChart('chart-cpr',{data:{labels:lblsMeta,datasets:[
+      {type:'bar',data:metaDias.map(d=>d.resultados||0),backgroundColor:'#818cf822',borderColor:'#818cf855',borderWidth:1,borderRadius:3,yAxisID:'y2'},
+      {type:'line',data:metaDias.map(d=>d.cpr),borderColor:'var(--red)',backgroundColor:'transparent',pointRadius:5,pointBackgroundColor:metaDias.map(d=>d.cpr<=2.5?'var(--green)':'var(--red)'),borderWidth:2,tension:.3,yAxisID:'y'},
+      {type:'line',data:Array(lblsMeta.length).fill(2.5),borderColor:'#444',borderDash:[4,4],backgroundColor:'transparent',pointRadius:0,borderWidth:1,yAxisID:'y'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'var(--mut)',font:{size:9},maxRotation:45},grid:{display:false}},
+        y:{position:'left',min:1,max:3.5,ticks:{color:'#888',font:{size:10},callback:v=>'R$'+v.toFixed(2)},grid:{color:'rgba(255,255,255,.04)'}},
+        y2:{position:'right',ticks:{color:'#818cf8',font:{size:10}},grid:{display:false}}}}});
+
+    mkChart('chart-gasto',{type:'bar',data:{labels:lblsMeta,datasets:[{data:metaDias.map(d=>d.gasto||0),backgroundColor:'#1877f222',borderColor:'#1877f2',borderWidth:1,borderRadius:4}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{ticks:{color:'#888',font:{size:9},maxRotation:45},grid:{display:false}},
+          y:{ticks:{color:'#888',font:{size:10},callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,.04)'}}}}});
+
+    document.getElementById('cpr-dist').innerHTML=
+      [['Ótimo — CPR < R$2',cprBaixo,'var(--green)'],['Bom — R$2 a R$2,50',cprBom,'var(--green2)'],['Atenção — R$2,50 a R$3',cprAtencao,'var(--amber)'],['Crítico — CPR > R$3',cprCritico,'var(--red)']]
+      .map(([l,n,c])=>{const p=diasComMeta.length?Math.round(n/diasComMeta.length*100):0;
+        return `<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>${l}</span><span style="color:${c}">${n} dias (${p}%)</span></div><div class="bar-mini"><div class="bar-mini-fill" style="width:${p}%;background:${c}"></div></div></div>`;
+      }).join('');
+
+    const maxConvs=campanhas.length?campanhas[0].convs:1;
+    document.getElementById('camp-list').innerHTML=campanhas.length?campanhas.map((c,i)=>{
+      const bW=maxConvs>0?Math.round(c.convs/maxConvs*100):0;
+      const cc=c.cpr<=2.49?'var(--green)':c.cpr>3?'var(--red)':'var(--amber)';
+      const sb=c.status==='ACTIVE'?`<span style="font-size:9px;padding:3px 8px;border-radius:999px;background:var(--green-bg);color:var(--green);border:1px solid rgba(61,255,140,.2);font-weight:600">ATIVA</span>`:`<span style="font-size:9px;padding:3px 8px;border-radius:999px;background:#1a1a2a;color:var(--mut);border:1px solid var(--border)">PAUSADA</span>`;
+      return `<div class="camp-item">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <span style="font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i===0?'★ ':''}${i+1}. ${c.nome}</span>
+          <div style="display:flex;gap:10px;align-items:center;flex-shrink:0">${sb}
+            <span style="font-size:12px;color:var(--mut)">R$${c.gasto.toFixed(2).replace('.',',')}</span>
+            <span style="font-size:12px;font-weight:600;color:${cc}">CPR R$${c.cpr.toFixed(2).replace('.',',')}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--purple)">${c.convs} conv</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden"><div style="width:${bW}%;height:4px;background:${c.status==='ACTIVE'?'#818cf8':'#333'}"></div></div>
+          <span style="font-size:11px;color:var(--mut);flex-shrink:0">${Math.round(c.impr/1000)}k impr</span>
+        </div></div>`;
+    }).join(''):`<div style="color:var(--mut);padding:20px 0;font-size:13px">Nenhuma campanha com dados</div>`;
+
+    // HISTÓRICO
+    const lbls=dias.map(d=>d.dia+'/'+MES_ABV);
+    document.getElementById('hist-badge').textContent=diaComFat+' dias com fat';
+    mkChart('chart-fat',{data:{labels:lbls,datasets:[
+      {type:'bar',data:dias.map(d=>d.f),backgroundColor:dias.map(d=>d.f>=META?'rgba(61,255,140,.5)':d.f===0?'rgba(226,75,74,.15)':'rgba(61,255,140,.15)'),borderColor:dias.map(d=>d.f>=META?'var(--green)':'transparent'),borderWidth:1,borderRadius:4,yAxisID:'y'},
+      {type:'line',data:dias.map(d=>d.l),borderColor:'var(--blue)',backgroundColor:'transparent',pointRadius:3,pointBackgroundColor:dias.map(d=>d.l>=0?'var(--blue)':'var(--red)'),borderWidth:2,tension:.3,yAxisID:'y'},
+      {type:'line',data:Array(lbls.length).fill(META),borderColor:'var(--red)',borderDash:[4,4],backgroundColor:'transparent',pointRadius:0,borderWidth:1.5,yAxisID:'y'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#888',font:{size:9},maxRotation:45},grid:{display:false}},
+        y:{ticks:{color:'#888',font:{size:10},callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,.04)'}}}}});
+
+    mkChart('chart-funil',{data:{labels:lbls,datasets:[
+      {type:'bar',data:dias.map(d=>d.fech),backgroundColor:'rgba(96,165,250,.3)',borderColor:'var(--blue)',borderWidth:1,borderRadius:3,yAxisID:'y'},
+      {type:'bar',data:dias.map(d=>d.aprov),backgroundColor:'rgba(61,255,140,.25)',borderColor:'var(--green)',borderWidth:1,borderRadius:3,yAxisID:'y'},
+      {type:'line',data:dias.map(d=>d.fech>0?Math.round(d.aprov/d.fech*100):null),borderColor:'var(--amber)',backgroundColor:'transparent',pointRadius:4,pointBackgroundColor:'var(--amber)',borderWidth:2,tension:.3,yAxisID:'y2',spanGaps:true}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{color:'#888',font:{size:9},maxRotation:45},grid:{display:false}},
+        y:{ticks:{color:'#888',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'},position:'left'},
+        y2:{ticks:{color:'var(--amber)',font:{size:10},callback:v=>v+'%'},grid:{display:false},position:'right',min:0,max:160}}}});
+
+    let sortCol='dia',sortAsc=true;
+    function renderTbl(){
+      const sorted=[...dias].sort((a,b)=>{const va=a[sortCol]||0,vb=b[sortCol]||0;return sortAsc?va-vb:vb-va;});
+      const cols=[{k:'dia',l:'Dia'},{k:'f',l:'Fat.'},{k:'fech',l:'Fech'},{k:'aprov',l:'Aprov'},{k:'l',l:'Lucro'},{k:'cpr',l:'CPR'},{k:'t',l:'Tráfego'}];
+      const head='<thead><tr>'+cols.map(c=>{const a=sortCol===c.k?(sortAsc?' ↑':' ↓'):'';return`<th onclick="sortBy('${c.k}')" style="transition:color .15s">${c.l}${a}</th>`;}).join('')+'</tr></thead>';
+      const body='<tbody>'+sorted.map(d=>{
+        const lc=d.l;
+        const cprH=d.cpr?`<span style="color:${cprClr(d.cpr)}">R$${d.cpr.toFixed(2).replace('.',',')}</span>`:'—';
+        return `<tr class="${d.f>=META?'meta-ok':''}">
+          <td style="color:${d.f>=META?'var(--green)':'var(--mut)'};font-family:'Inter'">${d.f>=META?'✓ ':''} ${d.dia}/${MES_ABV}</td>
+          <td style="color:${d.f>=META?'var(--green)':d.f>0?'var(--txt)':'var(--mut)'};font-weight:${d.f>=META?700:400}">${fmtD(d.f)}</td>
+          <td style="color:var(--blue)">${d.fech||0}</td>
+          <td style="color:var(--green)">${d.aprov||0}${d.fech>0?`<span style="font-size:10px;color:var(--mut)"> ${Math.round(d.aprov/d.fech*100)}%</span>`:''}</td>
+          <td style="color:${lc>=0?'var(--green)':'var(--red)'}">${lc<0?'-R$':'R$'}${Math.abs(Math.round(lc)).toLocaleString('pt-BR')}</td>
+          <td>${cprH}</td>
+          <td style="color:var(--mut)">${fmt(d.t)}</td>
+        </tr>`;
+      }).join('')+'</tbody>';
+      document.getElementById('hist-tbl').innerHTML=head+body;
+    }
+    window.sortBy=(col)=>{if(sortCol===col)sortAsc=!sortAsc;else{sortCol=col;sortAsc=false;}renderTbl();};
+    renderTbl();
+
+    // INSIGHTS
+    const sorted2=[...dias].filter(d=>d.f>0).sort((a,b)=>b.f-a.f);
+    const top5=sorted2.slice(0,5),bot5=sorted2.slice(-5).reverse();
+    document.getElementById('insights-kpis').innerHTML=
+      kc('Ticket médio',fmtD(ticketMed),'fat ÷ aprovados')+
+      kc('Custo/aprovado',fmtD(cpa),'tráf ÷ aprovados')+
+      kc('ROI tráfego',roiReal+'%','retorno sobre traf',roiReal>=100?'green':'amber')+
+      kc('Melhor dia',fmt(top5[0]?top5[0].f:0),top5[0]?top5[0].dia+'/'+MES_ABV:'','green','var(--green)')+
+      kc('Streak ≥ meta',streak+' dias','consecutivos',streak>=3?'green':streak>=1?'amber':'red')+
+      kc('Conv. mensal',conv+'%',tsAprov+'/'+tsFech,conv>=55?'green':'amber');
+
+    const diaRow=d=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:.5px solid var(--border)">
+      <span style="color:var(--mut);font-size:13px">${d.dia}/${MES_ABV}</span>
+      <span style="font-size:13px;font-weight:600;color:${d.f>=META?'var(--green)':'var(--red)'}">${fmtD(d.f)}</span>
+      <span style="font-size:11px;color:var(--mut)">lucro ${fmt(d.l)}</span>
+      ${d.cpr?`<span style="font-size:10px;padding:2px 8px;border-radius:999px;background:${d.cpr<=2.49?'var(--green-bg)':'rgba(226,75,74,.1)'};color:${d.cpr<=2.49?'var(--green)':'var(--red)'};border:1px solid ${d.cpr<=2.49?'rgba(61,255,140,.2)':'rgba(226,75,74,.2)'}">CPR ${d.cpr.toFixed(2)}</span>`:'<span></span>'}
+    </div>`;
+    document.getElementById('top-dias').innerHTML=top5.map(diaRow).join('');
+    document.getElementById('bot-dias').innerHTML=bot5.map(diaRow).join('');
+
+    const corrX=[],corrY=[],corrLbls=[];
+    for(let ci=0;ci<dias.length-1;ci++){
+      if(dias[ci].cpr>0&&dias[ci+1].f>0){corrX.push(+dias[ci].cpr.toFixed(2));corrY.push(dias[ci+1].f);corrLbls.push(dias[ci].dia+'/'+MES_ABV+'→'+(dias[ci].dia+1)+'/'+MES_ABV);}
+    }
+    mkChart('chart-corr',{type:'scatter',data:{datasets:[{data:corrX.map((x,i)=>({x,y:corrY[i]})),backgroundColor:corrX.map(x=>x<=2.5?'rgba(61,255,140,.7)':'rgba(226,75,74,.7)'),pointRadius:7}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>corrLbls[ctx.dataIndex]+': CPR R$'+ctx.parsed.x.toFixed(2)+' → '+fmtD(ctx.parsed.y)}}},
+        scales:{x:{title:{display:true,text:'CPR hoje (R$)',color:'var(--mut)'},ticks:{color:'#888',callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,.04)'}},
+          y:{title:{display:true,text:'Faturamento D+1',color:'var(--mut)'},ticks:{color:'#888',callback:v=>'R$'+v},grid:{color:'rgba(255,255,255,.04)'}}}}});
+
+    const cprFatB=corrX.map((x,i)=>x<2.3?corrY[i]:null).filter(Boolean);
+    const cprFatA=corrX.map((x,i)=>x>=2.5?corrY[i]:null).filter(Boolean);
+    const medB=cprFatB.length?Math.round(cprFatB.reduce((s,v)=>s+v,0)/cprFatB.length):0;
+    const medA=cprFatA.length?Math.round(cprFatA.reduce((s,v)=>s+v,0)/cprFatA.length):0;
+    document.getElementById('corr-insight').textContent=`CPR < R$2,30: fat média D+1 = R$${medB.toLocaleString('pt-BR')} | CPR ≥ R$2,50: fat média D+1 = R$${medA.toLocaleString('pt-BR')}`;
+
+    document.getElementById('insights-list').innerHTML=[
+      `<div class="card"><div style="font-size:13px">🏆 Melhor dia: <b>${top5[0]?top5[0].dia+'/'+MES_ABV+' — '+fmt(top5[0].f):'—'}</b></div></div>`,
+      `<div class="card"><div style="font-size:13px">⏱ CPR baixo hoje = fat média amanhã <b style="color:var(--green)">${fmt(medB)}</b></div></div>`,
+      `<div class="card"><div style="font-size:13px">💰 ROI tráfego: <b style="color:${roiReal>=100?'var(--green)':'var(--amber)'}">${roiReal}%</b> — R$1 investido gerou R$${tt>0?(tf/tt).toFixed(2).replace('.',','):'0'} em fat</div></div>`,
+      `<div class="card"><div style="font-size:13px">🎯 ${diasAcima} de ${dias.filter(d=>d.f>0).length} dias bateram R$700 — Projeção: <b>${fmt(tf/hoje*31)}</b></div></div>`,
+    ].join('');
+
+    // FECHAMENTO
+    const SOCIOS=[{nome:'Diego',pct:42,cor:'var(--green)'},{nome:'Gui',pct:42,cor:'var(--blue)'},{nome:'Peter',pct:8,cor:'var(--purple)'},{nome:'França',pct:8,cor:'var(--amber)'}];
+    const diasRestantes=DIAS_MES-hoje;
+    const mediaLucro=diaComFat>0?lucro/diaComFat:0;
+    const projecaoFinal=lucro+(mediaLucro*diasRestantes);
+    const projecaoFat=tf+(tf/diaComFat*diasRestantes);
+    document.getElementById('fech-badge').textContent='Lucro '+fmt(lucro);
+    document.getElementById('fech-kpis').innerHTML=
+      kc('Lucro líquido',(lucro<0?'-R$':'R$')+Math.abs(Math.round(lucro)).toLocaleString('pt-BR'),'fat−traf−saídas−desp',lucro>=0?'green':'red')+
+      kc('Faturamento bruto',fmt(tf),'1 a '+hoje+'/'+MES_ABV,'green','var(--green)')+
+      kc('Total deduções','-'+fmt(tt+tsaida+tdp),'traf+saídas+desp','red','var(--red)')+
+      kc('Dias restantes',diasRestantes+' dias','até 31/'+MES_ABV)+
+      kc('Projeção lucro',fmt(projecaoFinal),'se manter ritmo',projecaoFinal>0?'green':'red')+
+      kc('Projeção fat.',fmt(projecaoFat),'estimativa 31/'+MES_ABV);
+
+    document.getElementById('fech-socios').innerHTML=
+      `<div style="font-size:11px;color:var(--mut);margin-bottom:14px">Lucro disponível: <b style="color:var(--green)">${(lucro<0?'-R$':'R$')+Math.abs(Math.round(lucro)).toLocaleString('pt-BR')}</b></div>`+
+      SOCIOS.map(s=>{
+        const val=Math.round(lucro*(s.pct/100));
+        const valP=Math.round(projecaoFinal*(s.pct/100));
+        return `<div class="socio-row">
+          <div class="socio-av" style="background:linear-gradient(135deg,${s.cor}44,${s.cor}88)">${s.nome[0]}</div>
+          <div><div class="socio-nm">${s.nome}</div><div class="socio-pc">${s.pct}%</div></div>
+          <div style="margin-left:auto;text-align:right"><div class="socio-vl money" style="color:${s.cor}">${(val<0?'-R$':'R$')+Math.abs(val).toLocaleString('pt-BR')}</div><div style="font-size:10px;color:var(--mut);margin-top:2px">proj. ${(valP<0?'-R$':'R$')+Math.abs(valP).toLocaleString('pt-BR')}</div></div>
+        </div>`;
+      }).join('');
+
+    document.getElementById('fech-proj').innerHTML=
+      `<div style="font-size:11px;color:var(--mut);margin-bottom:14px">Baseado na média de ${hoje} dias</div>`+
+      [{l:'Média lucro/dia',v:fmt(mediaLucro),c:'var(--txt)'},{l:'Projeção faturamento',v:fmt(projecaoFat),c:'var(--green)'},
+       {l:'Projeção lucro líquido',v:fmt(projecaoFinal),c:projecaoFinal>0?'var(--green)':'var(--red)'},
+       {l:'Dias acima da meta',v:diasAcima+' de '+diaComFat,c:diasAcima/diaComFat>=0.5?'var(--green)':'var(--amber)'},
+       {l:'Dias restantes',v:diasRestantes+' dias',c:'var(--mut)'}]
+      .map(x=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:.5px solid var(--border)"><span style="font-size:12px;color:var(--mut)">${x.l}</span><span style="font-size:13px;font-weight:600;color:${x.c}">${x.v}</span></div>`).join('');
+
+    const melhorias=[];
+    if(mM.cpr>2.5)melhorias.push({c:'red',t:'CPR acima do ideal',d:'CPR mês R$'+mM.cpr.toFixed(2)+' (meta ≤ R$2,50) — revisar criativos'});
+    if(conv<55)melhorias.push({c:'amber',t:'Conversão abaixo de 55%',d:'Fech→aprov: '+conv+'% — verificar atendimento e entrega'});
+    if(streak===0)melhorias.push({c:'amber',t:'Sem sequência acima da meta',d:'Nenhum dia consecutivo acima de R$700'});
+    const diasNeg=dias.filter(d=>d.l<0&&d.f>0);
+    if(diasNeg.length>3)melhorias.push({c:'red',t:diasNeg.length+' dias com lucro negativo',d:'Dias: '+diasNeg.map(d=>d.dia+'/'+MES_ABV).join(', ')});
+    if(!melhorias.length)melhorias.push({c:'green',t:'Nenhum ponto crítico identificado',d:'Todos os indicadores dentro do esperado'});
+    document.getElementById('fech-melhorias').innerHTML=melhorias.map(m=>{
+      const cor=m.c==='red'?'var(--red)':m.c==='green'?'var(--green)':'var(--amber)';
+      return `<div style="padding:10px 0;border-bottom:.5px solid var(--border)"><div style="font-size:13px;font-weight:600;color:${cor};margin-bottom:3px">${m.t}</div><div style="font-size:12px;color:var(--mut)">${m.d}</div></div>`;
+    }).join('');
+
+    document.getElementById('fech-resumo').innerHTML=
+      [{l:'Período',v:'1 a '+hoje+'/'+MES_ABV+'/'+ANO},{l:'Faturamento',v:fmt(tf)},{l:'Gasto tráfego',v:fmt(tt)},
+       {l:'Saídas + despesas',v:tsaida+tdp>0?'-'+fmt(tsaida+tdp):'R$0'},
+       {l:'Lucro líquido',v:(lucro<0?'-R$':'R$')+Math.abs(Math.round(lucro)).toLocaleString('pt-BR'),c:lucro>=0?'var(--green)':'var(--red)',b:true},
+       {l:'ROI tráfego',v:roiReal+'%',c:roiReal>=100?'var(--green)':'var(--amber)'},
+       {l:'Conv fech→aprov',v:conv+'%',c:conv>=55?'var(--green)':'var(--amber)'},
+       {l:'CPR médio',v:'R$'+mM.cpr.toFixed(2).replace('.',','),c:mM.cpr<=2.49?'var(--green)':'var(--red)'},
+       {l:'Ticket médio/aprovado',v:fmtD(ticketMed)},{l:'Total aprovados',v:tsAprov+' logos'}]
+      .map(x=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--border)"><span style="font-size:12px;color:var(--mut)">${x.l}</span><span style="font-size:13px;${x.b?'font-weight:700;':''}color:${x.c||'var(--txt)'}">${x.v}</span></div>`).join('');
+
+    // TABELA FECHAMENTO
+    const tblFech=document.getElementById('fech-tbl');
+    if(tblFech){
+      const head3='<thead><tr>'+['DATA','TRÁFEGO','SAÍDA','DESPESAS','FATURAMENTO','10 F.','19 F.','24 F.','70 A.','75 A.','80+ A.','LUCRO'].map(c=>`<th>${c}</th>`).join('')+'</tr></thead>';
+      let sT=0,sS=0,sD=0,sF=0,sF10=0,sF19=0,sF24=0,sA70=0,sA75=0,sA80=0,sL=0,nD=0;
+      const body3='<tbody>'+dias.map(d=>{
+        sT+=d.t;sS+=(d.saida||0);sD+=(d.dp||0);sF+=d.f;
+        sF10+=d.c10||0;sF19+=d.c19||0;sF24+=d.c24||0;
+        sA70+=d.c70||0;sA75+=d.c75||0;sA80+=d.c80||0;
+        sL+=d.l;if(d.f>0)nD++;
+        return `<tr>
+          <td style="color:${d.f>=META?'var(--green)':d.f>0?'var(--mut2)':'var(--mut)'};font-weight:${d.f>=META?600:400};font-family:'Inter'">${d.dia}/${MES_ABV}</td>
+          <td style="color:var(--red)">${fmtD(d.t)}</td>
+          <td style="color:${d.saida>0?'var(--red)':'var(--mut)'}">${d.saida>0?fmtD(d.saida):''}</td>
+          <td style="color:${d.dp>0?'var(--red)':'var(--mut)'}">${d.dp>0?fmtD(d.dp):''}</td>
+          <td style="color:${d.f>=META?'var(--green)':d.f>0?'var(--txt)':'var(--mut)'};font-weight:${d.f>=META?700:400}">${fmtD(d.f)}</td>
+          <td style="color:var(--blue)">${d.c10||''}</td>
+          <td style="color:var(--purple)">${d.c19||''}</td>
+          <td style="color:#a78bfa">${d.c24||''}</td>
+          <td style="color:var(--green)">${d.c70||''}</td>
+          <td style="color:var(--green)">${d.c75||''}</td>
+          <td style="color:var(--green)">${d.c80||''}</td>
+          <td style="color:${d.l>=0?'var(--green)':'var(--red)'};font-weight:600">${d.l<0?'-R$':'R$'}${Math.abs(d.l).toFixed(2).replace('.',',')}</td>
+        </tr>`;
+      }).join('');
+      const foot='<tfoot>'+
+        `<tr class="row-total"><td>TOTAL</td><td>${fmtD(sT)}</td><td>${sS>0?fmtD(sS):''}</td><td>${fmtD(sD)}</td><td>${fmtD(sF)}</td><td>${sF10}</td><td>${sF19}</td><td>${sF24}</td><td>${sA70}</td><td>${sA75}</td><td>${sA80}</td><td style="color:${sL>=0?'var(--green)':'var(--red)'}">${sL<0?'-R$':'R$'}${Math.abs(sL).toFixed(2).replace('.',',')}</td></tr>`+
+        `<tr class="row-media"><td>MÉDIA</td><td>${fmtD(sT/Math.max(nD,1))}</td><td></td><td>${fmtD(sD/Math.max(nD,1))}</td><td>${fmtD(sF/Math.max(nD,1))}</td><td>${(sF10/Math.max(nD,1)).toFixed(1)}</td><td>${(sF19/Math.max(nD,1)).toFixed(1)}</td><td>${(sF24/Math.max(nD,1)).toFixed(1)}</td><td>${(sA70/Math.max(nD,1)).toFixed(1)}</td><td>${(sA75/Math.max(nD,1)).toFixed(1)}</td><td>${(sA80/Math.max(nD,1)).toFixed(1)}</td><td>${fmtD(sL/Math.max(nD,1))}</td></tr>`+
+      '</tfoot>';
+      tblFech.innerHTML=head3+body3+foot;
+    }
+
+    // FUNDO ALIEN
+    // Base: R$2.550 em Junho/2026 (+R$1.500/mês)
+    var FUNDO_BASE=2550, FUNDO_MENSAL=1500;
+    var FUNDO_START_ANO=2026, FUNDO_START_MES=5; // junho=5 (0-indexed)
+    var mesesDecorridos=(ANO-FUNDO_START_ANO)*12+(mesIdx-FUNDO_START_MES);
+    var fundoAtual=FUNDO_BASE+(mesesDecorridos*FUNDO_MENSAL);
+    var fundoProxMes=fundoAtual+FUNDO_MENSAL;
+    var fundoEl=document.getElementById('fundo-alien');
+    if(fundoEl){
+      var SOCIOS_FUNDO=[{n:'Diego',p:42},{n:'Gui',p:42},{n:'Peter',p:8},{n:'Fran\u00e7a',p:8}];
+      fundoEl.innerHTML=
+        '<div style="margin-bottom:14px">'+
+          '<div style="font-size:32px;font-weight:700;color:#BA7517;font-family:\'Space Grotesk\'">R$'+fundoAtual.toLocaleString('pt-BR')+',00</div>'+
+          '<div style="font-size:12px;color:#555;margin-top:4px">Acumulado at\u00e9 '+MES_NOME+'/'+ANO+' \u2014 pr\u00f3ximo m\u00eas: <b style="color:#BA7517">R$'+fundoProxMes.toLocaleString('pt-BR')+',00</b> (+R$1.500)</div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">'+
+        SOCIOS_FUNDO.map(function(s){
+          var val=Math.round(fundoAtual*(s.p/100));
+          return '<div style="background:#1a1a1a;border-radius:8px;padding:12px 14px">'+
+            '<div style="font-size:11px;color:#555;margin-bottom:4px">'+s.n+' ('+s.p+'%)</div>'+
+            '<div style="font-size:18px;font-weight:600;color:#BA7517">R$'+val.toLocaleString('pt-BR')+',00</div>'+
+          '</div>';
+        }).join('')+
+        '</div>'+
+        '<div style="margin-top:12px;font-size:11px;color:#444;padding-top:10px;border-top:.5px solid #222">'+
+          'Iniciado em Jun/2026 \u2014 R$1.500 adicionado todo 1\u00ba do m\u00eas \u2014 '+mesesDecorridos+' m\u00eas(es) acumulados'+
+        '</div>';
+    }
+
+    // Notas
+    const notasEl=document.getElementById('fech-notas');
+    if(notasEl&&!notasEl._loaded){notasEl.value=localStorage.getItem(NOTAS_KEY+ABA)||'';notasEl._loaded=true;}
+
+  }catch(e){
+    console.error(e);
+    document.querySelector('.page.active').innerHTML=`<div style="text-align:center;padding:80px;color:var(--mut)">Erro: ${e.message}</div>`;
+  }
+}
+
+init();
+setInterval(init,300000);
+
+window.salvarNotas=function(){
+  const MESES_ABA=['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+  const ABA=MESES_ABA[new Date().getMonth()];
+  localStorage.setItem(NOTAS_KEY+ABA,el.value);
+  const st=document.getElementById('notas-status');
+  if(st){st.textContent='Salvo '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});st.style.color='var(--green)';setTimeout(()=>{if(st)st.style.color='var(--mut)';},2000);}
+};
+window.limparNotas=function(){
+  if(!confirm('Limpar todas as anotações?'))return;
+  const MESES_ABA=['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+  localStorage.removeItem(NOTAS_KEY+MESES_ABA[new Date().getMonth()]);
+  const el=document.getElementById('fech-notas');if(el)el.value='';
+};
+</script>
+</body>
+</html>
