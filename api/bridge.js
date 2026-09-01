@@ -114,7 +114,7 @@ async function getMesCSV(m) {
   if (GID_MAP[m]) {
     tentativas.push({
       url: 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + GID_MAP[m],
-      via: 'gid:' + GID_MAP[m]
+      via: 'gid:' + GID_MAP[m], estrito: false
     });
   }
 
@@ -123,7 +123,7 @@ async function getMesCSV(m) {
   if (gidDescoberto && String(gidDescoberto) !== String(GID_MAP[m] || '')) {
     tentativas.push({
       url: 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + gidDescoberto,
-      via: 'aba:' + gidDescoberto
+      via: 'aba:' + gidDescoberto, estrito: true
     });
   }
 
@@ -131,7 +131,7 @@ async function getMesCSV(m) {
     tentativas.push({
       url: 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
            '/gviz/tq?tqx=out:csv&headers=0&sheet=' + encodeURIComponent(nome),
-      via: 'nome:' + nome
+      via: 'nome:' + nome, estrito: true
     });
   }
 
@@ -140,7 +140,10 @@ async function getMesCSV(m) {
     const csv = await tryFetch(t.url);
     if (!csv) continue;
     const mesLido = mesDoCSV(csv);
-    if (mesLido !== null && mesLido !== m) { recusado = NOMES[mesLido]; continue; } // veio a aba errada
+    // Busca por nome pode cair na aba errada (o gviz devolve a primeira aba em vez
+    // de dar erro) — por isso so o gid fixo entra sem conferencia. A aba de maio,
+    // por exemplo, tem gid certo mas a coluna DATA ainda mostra "1-mar.".
+    if (t.estrito && mesLido !== null && mesLido !== m) { recusado = NOMES[mesLido]; continue; }
     return { csv: csv, via: t.via, conferido: mesLido === m };
   }
   return recusado ? { erroMes: recusado } : null;
