@@ -310,6 +310,8 @@ function render(d){
   if(ch)ch.destroy();
   ch=new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'Sinais',data:sin,backgroundColor:'rgba(61,142,255,.45)',borderColor:'#3d8eff',borderWidth:1,borderRadius:3},{label:'Aprovados',data:apr,backgroundColor:'rgba(124,92,252,.45)',borderColor:'#7c5cfc',borderWidth:1,borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#5a5a7a',font:{size:10},boxWidth:8,padding:12}},tooltip:{callbacks:{label:c=>' '+c.dataset.label+': R$'+c.raw.toFixed(2)}}},scales:{x:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9}},grid:{color:'#0d0d1a'}},y:{stacked:true,ticks:{color:'#2e2e4a',font:{size:9},callback:v=>'R$'+v},grid:{color:'#0d0d1a'}}}}});
   S('upd','atualizado '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
+  const av=d.avisos||[],ed=document.getElementById('err');
+  if(av.length){ed.style.display='block';S('err-msg',av.join(' - '));}else{ed.style.display='none';}
 }
 async function load(){
   document.getElementById('err').style.display='none';
