@@ -225,7 +225,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div class="section-hdr"><div class="section-title">Histórico</div><div class="section-badge" id="hist-badge">—</div></div>
   <div class="card">
     <div class="card-title">Faturamento diário + lucro</div>
-    <div class="legend"><span><div class="sq" style="background:var(--green)"></div>Fat ≥ meta</span><span><div class="sq" style="background:var(--blue)"></div>Lucro</span><span><div class="ln" style="background:var(--red)"></div>Meta R$700</span></div>
+    <div class="legend"><span><div class="sq" style="background:var(--green)"></div>Fat ≥ meta</span><span><div class="sq" style="background:var(--blue)"></div>Lucro</span><span><div class="ln" style="background:var(--red)"></div>Meta R$1.200</span></div>
     <div class="chart-wrap-lg"><canvas id="chart-fat"></canvas></div>
   </div>
   <div class="card">
@@ -286,7 +286,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </div>
 
 <script>
-var B='/api/bridge',M='/api/meta',META=700;
+var B='/api/bridge',M='/api/meta',META=1200;
 var charts={};
 var NOTAS_KEY='alien_notas';
 
@@ -453,9 +453,9 @@ async function init(){
       <div class="hero">
         <div class="hero-lbl">Faturamento de hoje</div>
         <div class="hero-val money">${fmtD(hojeD.f||0)}</div>
-        <div style="font-size:13px;margin-top:8px;color:${metaDiff>=0?'var(--green)':'var(--red)'}">${metaDiff>=0?'✓ R$'+Math.round(metaDiff)+' acima da meta':'↓ R$'+Math.abs(Math.round(metaDiff))+' abaixo da meta (R$700)'}</div>
+        <div style="font-size:13px;margin-top:8px;color:${metaDiff>=0?'var(--green)':'var(--red)'}">${metaDiff>=0?'✓ R$'+Math.round(metaDiff)+' acima da meta':'↓ R$'+Math.abs(Math.round(metaDiff))+' abaixo da meta (R$1.200)'}</div>
         <div class="meta-bar"><div class="meta-fill" style="width:${pct}%"></div></div>
-        <div class="meta-txt"><span>${pct}%</span><span>Meta R$ 700/dia</span></div>
+        <div class="meta-txt"><span>${pct}%</span><span>Meta R$ 1.200/dia</span></div>
       </div>`;
 
     document.getElementById('hoje-grid').innerHTML=`
@@ -635,7 +635,7 @@ async function init(){
       `<div class="card"><div style="font-size:13px">🏆 Melhor dia: <b>${top5[0]?top5[0].dia+'/'+MES_ABV+' — '+fmt(top5[0].f):'—'}</b></div></div>`,
       `<div class="card"><div style="font-size:13px">⏱ CPR baixo hoje = fat média amanhã <b style="color:var(--green)">${fmt(medB)}</b></div></div>`,
       `<div class="card"><div style="font-size:13px">💰 ROI tráfego: <b style="color:${roiReal>=100?'var(--green)':'var(--amber)'}">${roiReal}%</b> — R$1 investido gerou R$${tt>0?(tf/tt).toFixed(2).replace('.',','):'0'} em fat</div></div>`,
-      `<div class="card"><div style="font-size:13px">🎯 ${diasAcima} de ${dias.filter(d=>d.f>0).length} dias bateram R$700 — Projeção: <b>${fmt(tf/hoje*31)}</b></div></div>`,
+      `<div class="card"><div style="font-size:13px">🎯 ${diasAcima} de ${dias.filter(d=>d.f>0).length} dias bateram R$1.200 — Projeção: <b>${fmt(tf/hoje*31)}</b></div></div>`,
     ].join('');
 
     // FECHAMENTO
@@ -676,7 +676,7 @@ async function init(){
     const melhorias=[];
     if(mM.cpr>2.5)melhorias.push({c:'red',t:'CPR acima do ideal',d:'CPR mês R$'+mM.cpr.toFixed(2)+' (meta ≤ R$2,50) — revisar criativos'});
     if(conv<55)melhorias.push({c:'amber',t:'Conversão abaixo de 55%',d:'Fech→aprov: '+conv+'% — verificar atendimento e entrega'});
-    if(streak===0)melhorias.push({c:'amber',t:'Sem sequência acima da meta',d:'Nenhum dia consecutivo acima de R$700'});
+    if(streak===0)melhorias.push({c:'amber',t:'Sem sequência acima da meta',d:'Nenhum dia consecutivo acima de R$1.200'});
     const diasNeg=dias.filter(d=>d.l<0&&d.f>0);
     if(diasNeg.length>3)melhorias.push({c:'red',t:diasNeg.length+' dias com lucro negativo',d:'Dias: '+diasNeg.map(d=>d.dia+'/'+MES_ABV).join(', ')});
     if(!melhorias.length)melhorias.push({c:'green',t:'Nenhum ponto crítico identificado',d:'Todos os indicadores dentro do esperado'});
