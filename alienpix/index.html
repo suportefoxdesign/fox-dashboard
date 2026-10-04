@@ -412,12 +412,22 @@ function celebrate(valor,hora){
 }
 
 /* ============================================================ PROCESSAR LINHAS */
+/* dia da linha pela coluna DATA — nao depende de quantas linhas de cabecalho a aba tem */
+function diaDaLinha(c){
+  var s=String(c==null?'':c);
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if(m) return Number(m[3]);
+  var n=s.match(/^\D*(\d{1,2})\D/);
+  if(n) return Number(n[1]);
+  return null;
+}
 function processRows(rows, hojeIdx){
   let tf=0,tt=0,tsaida=0,tdp=0;
   let t10=0,t19=0,t24=0,t70=0,t75=0,t80=0;
   let dias=[];
-  rows.slice(1).forEach((r,i)=>{
-    const dia=i+1;
+  rows.forEach(r=>{
+    const dia=diaDaLinha(r[0]);
+    if(dia===null) return;
     const saida=parseFloat(String(r[2]).replace(',','.'))||0;
     const dp   =parseFloat(String(r[3]).replace(',','.'))||0;
     tsaida+=saida; tdp+=dp;
@@ -586,7 +596,7 @@ async function abrirMes(mesIdx){
   $('mesDetailContent').innerHTML='<div class="empty">Carregando…</div>';
   try{
     const ABA=MESES_ABA[mesIdx];
-    const r=await fetch(`${API}?aba=${ABA}&range=A3:L35`,{cache:'no-store'}).then(r=>r.json());
+    const r=await fetch(`${API}?aba=${ABA}&range=A1:L40`,{cache:'no-store'}).then(r=>r.json());
     const rows=r.data||[];
     const d=processRows(rows,30);
     const conv=d.tsFech>0?Math.round(d.tsAprov/d.tsFech*100):0;
@@ -629,7 +639,7 @@ async function poll(){
     const ABA=MESES_ABA[agora.getMonth()];
     const hoje=agora.getDate();
     const [r1,r2]=await Promise.all([
-      fetch(`${API}?aba=${ABA}&range=A3:L35`,{cache:'no-store'}).then(r=>r.json()),
+      fetch(`${API}?aba=${ABA}&range=A1:L40`,{cache:'no-store'}).then(r=>r.json()),
       fetch(`${API}?aba=${ABA}&range=M1:O1`,{cache:'no-store'}).then(r=>r.json()),
     ]);
     const rows=r1.data||[];
@@ -640,8 +650,7 @@ async function poll(){
     const lastVal=parseFloat(String(pixRow[0]).replace(',','.'))||0;
     let lastHora=String(pixRow[1]||'');
     if(!lastHora||lastHora==='0'||lastHora.toLowerCase().includes('num')) lastHora='';
-    const hojeRowIdx=hoje;
-    const hojeRow=rows[hojeRowIdx]||[];
+    const hojeRow=rows.find(r=>diaDaLinha(r[0])===hoje)||[];
     const newItems=buildFeedFromRow(hojeRow,lastVal,lastHora);
     const newKey=lastVal+'|'+lastHora+'|'+hoje;
     if(newKey!==lastPixKey&&lastVal>0){

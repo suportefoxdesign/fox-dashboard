@@ -287,6 +287,16 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <script>
 var B='/api/bridge',M='/api/meta',META=1200;
+/* dia da linha pela coluna DATA — nao depende de quantas linhas de cabecalho a aba tem */
+function diaDaLinha(c){
+  var s=String(c==null?'':c);
+  var m=s.match(/^(\d{4})-(\d{2})-(\d{2})T/);
+  if(m) return Number(m[3]);
+  var n=s.match(/^\D*(\d{1,2})\D/);
+  if(n) return Number(n[1]);
+  return null;
+}
+
 var charts={};
 var NOTAS_KEY='alien_notas';
 
@@ -393,7 +403,7 @@ async function init(){
     document.getElementById('hoje-date').textContent=hoje+' de '+MES_NOME;
 
     const [r1,r2,r3,r4,r5]=await Promise.all([
-      fetch(B+'?aba='+ABA+'&range=A3:L35').then(r=>r.json()),
+      fetch(B+'?aba='+ABA+'&range=A1:L40').then(r=>r.json()),
       fetch(B+'?aba='+ABA+'&range=M1:O1').then(r=>r.json()),
       fetch(M+'?tipo=resumo').then(r=>r.json()).catch(()=>null),
       fetch(M+'?tipo=mes_diario').then(r=>r.json()).catch(()=>null),
@@ -413,8 +423,9 @@ async function init(){
 
     let tf=0,tt=0,tsaida=0,tdp=0,t10=0,t19=0,t24=0,t70=0,t75=0,t80=0;
     let dias=[];
-    rows.slice(1).forEach((r,i)=>{
-      const dia=i+1;
+    rows.forEach(r=>{
+      const dia=diaDaLinha(r[0]);
+      if(dia===null)return;
       const saida=parseFloat(r[2])||0,dp=parseFloat(r[3])||0;
       if(dia<=31){tsaida+=saida;tdp+=dp;}
       if(dia>hoje)return;
