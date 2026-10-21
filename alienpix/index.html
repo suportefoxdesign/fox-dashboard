@@ -644,8 +644,9 @@ async function poll(){
     ]);
     const rows=r1.data||[];
     const d=processRows(rows,hoje-1);
-    const hojeD=d.dias[d.dias.length-1]||{f:0,t:0,l:0,fech:0,aprov:0,c10:0,c19:0,c24:0,c70:0,c75:0,c80:0};
-    const ontemD=d.dias.length>1?d.dias[d.dias.length-2]:null;
+    /* hoje e ontem pelo numero do dia — dia sem lancamento nao pode herdar o dia anterior */
+    const hojeD=d.dias.find(x=>x.dia===hoje)||{dia:hoje,f:0,t:0,saida:0,dp:0,l:0,fech:0,aprov:0,c10:0,c19:0,c24:0,c70:0,c75:0,c80:0};
+    const ontemD=d.dias.find(x=>x.dia===hoje-1)||null;
     const pixRow=(r2.data&&r2.data[0])||[];
     const lastVal=parseFloat(String(pixRow[0]).replace(',','.'))||0;
     let lastHora=String(pixRow[1]||'');

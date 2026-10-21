@@ -449,8 +449,9 @@ async function init(){
     let streak=0;
     for(let si=dias.length-1;si>=0;si--){if(dias[si].f>=META)streak++;else break;}
     const diasAcima=dias.filter(d=>d.f>=META).length;
-    const hojeD=dias[dias.length-1]||{};
-    const ontemD=dias.length>1?dias[dias.length-2]:{};
+    /* hoje e ontem pelo numero do dia — dia sem lancamento nao pode herdar o dia anterior */
+    const hojeD=dias.find(x=>x.dia===hoje)||{dia:hoje,f:0,t:0,saida:0,dp:0,l:0,fech:0,aprov:0,c10:0,c19:0,c24:0,c70:0,c75:0,c80:0,gasto:0,convs:0,cpr:0};
+    const ontemD=dias.find(x=>x.dia===hoje-1)||{};
     const delta=(hojeD.f||0)-(ontemD.f||0);
     const hFech=hojeD.fech||0,hAprov=hojeD.aprov||0;
     const hConv=hFech>0?Math.round(hAprov/hFech*100):0;
