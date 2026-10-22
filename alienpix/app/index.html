@@ -196,6 +196,8 @@ nav button.active svg{filter:drop-shadow(0 0 4px rgba(61,255,140,.6))}
 .tag.pend{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.25)}
 .tag.ok{background:rgba(61,255,140,.1);color:var(--green);border:1px solid rgba(61,255,140,.2)}
 .tag.nao{background:rgba(226,75,74,.1);color:var(--red);border:1px solid rgba(226,75,74,.2)}
+.tag.esp{background:rgba(140,91,255,.12);color:var(--purple);border:1px solid rgba(140,91,255,.22)}
+.ped.esp{opacity:.78}
 .frm{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .frm .f1{grid-column:1/-1}
 .fld label{display:block;font-size:9px;color:var(--mut2);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;font-weight:600}
@@ -725,6 +727,8 @@ function quemSou(){ const k=localStorage.getItem('apx_user'); return (USERS[k]&&
 const soDigitos = s => String(s==null?'':s).replace(/\D/g,'');
 const confirmado = p => !!soDigitos(p.cep).length;
 const naoEAdesivo = p => /nao e adesivo|não é adesivo/i.test(String(p.status||''));
+/* so vira pedido pra confirmar quando o restante cai; o sinal sozinho fica esperando */
+const soSinal = p => /sinal recebido/i.test(String(p.status||'')) && !confirmado(p);
 
 function segAdesivos(sub){
   document.querySelectorAll('#view-adesivos .seg').forEach(b=>b.classList.toggle('active',b.dataset.sub===sub));
@@ -743,7 +747,7 @@ async function carregarPedidos(){
 
 function renderPedidos(){
   const ps = _pedidos.slice().reverse();
-  const falta = ps.filter(p=>!confirmado(p)&&!naoEAdesivo(p)).length;
+  const falta = ps.filter(p=>!confirmado(p)&&!naoEAdesivo(p)&&!soSinal(p)).length;
   $('adCount').textContent = falta ? falta+' a confirmar' : ps.length+' pedido'+(ps.length===1?'':'s');
   $('adList').innerHTML = ps.length
     ? ps.map(cardPedido).join('')
@@ -759,12 +763,19 @@ function cardPedido(p){
   const id = String(p.pedido||'');
   const nao = naoEAdesivo(p);
   const ok  = confirmado(p);
+  const esp = soSinal(p);
   const st  = String(p.status||'');
   const tag = nao ? '<span class="tag nao">não é adesivo</span>'
+            : esp ? '<span class="tag esp">aguardando o restante</span>'
             : ok  ? '<span class="tag ok">'+(st||'confirmado')+'</span>'
                   : '<span class="tag pend">confirmar tamanho e CEP</span>';
   const pago = Number(p.valor_pago)||0;
-  const corpo = nao ? '' : `
+  const corpo = nao ? '' : esp ? `
+    <div class="nota">Só o sinal entrou. Quando o restante cair, o pedido aparece aqui pra confirmar tamanho e CEP.</div>
+    <div class="btn-row" style="grid-template-columns:1fr">
+      <button class="btn danger" onclick="confirmarPedido('${id}',true)">Não é adesivo</button>
+    </div>
+    <div class="msg" id="ad-msg-${id}"></div>` : `
     <div class="frm">
       <div class="fld"><label>Largura (cm)</label><input id="ad-l-${id}" type="number" inputmode="numeric" value="${Number(p.largura_cm)||60}"></div>
       <div class="fld"><label>Altura (cm)</label><input id="ad-a-${id}" type="number" inputmode="numeric" value="${Number(p.altura_cm)||60}"></div>
@@ -784,7 +795,7 @@ function cardPedido(p){
       <div><span>Frete ${p.regiao||''}</span><b class="blue">${fmt(p.frete)}</b></div>
       <div><span>Preço base</span><b class="amber">${fmt(p.referencia)}</b></div>
     </div>`:''}`;
-  return `<div class="ped${ok||nao?'':' pend'}" id="ad-card-${id}">
+  return `<div class="ped${ok||nao||esp?'':' pend'}${esp?' esp':''}" id="ad-card-${id}">
     <div class="ped-top">
       <div>
         <div class="ped-id">${id}</div>
