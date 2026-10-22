@@ -121,13 +121,54 @@ async function baixar(url) {
   } catch (e) { return null; }
 }
 
+// Descobre nome -> gid pelo htmlview (publico, sem token). Assim o mes novo
+// e achado sozinho e a gente baixa pelo /export, nao pelo gviz.
+let _abasCache = null;
+async function descobrirAbas() {
+  if (_abasCache) return _abasCache;
+  const mapa = {};
+  try {
+    const r = await fetch('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/htmlview');
+    if (r.ok) {
+      const html = await r.text();
+      const re = /id="sheet-button-(\d+)"[^>]*>\s*(?:<a[^>]*>)?([^<]+)/g;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        const nome = normalizar(m[2]);
+        if (nome) mapa[nome] = m[1];
+      }
+    }
+  } catch (e) { /* sem descoberta, cai no gviz */ }
+  _abasCache = mapa;
+  return mapa;
+}
+
+function gidPeloNome(mapa, k) {
+  const comAcento = k === 'MARCO' ? 'MARCO' : k;
+  for (const nome in mapa) if (nome === k || nome === comAcento) return mapa[nome];
+  for (const nome in mapa) if (nome.startsWith(k)) return mapa[nome];
+  return null;
+}
+
+// ATENCAO: o gviz tipa a coluna inteira e apaga a celula que destoa — um cabecalho
+// de texto no topo de uma coluna de numeros volta vazio. Por isso o /export vem
+// primeiro: ele devolve o texto formatado, fiel a planilha.
 async function csvDaAba(aba) {
   const k = normalizar(aba);
+  const exportar = gid => baixar('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + gid);
+
   if (GID_MAP[k]) {
-    const c = await baixar('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv&gid=' + GID_MAP[k]);
+    const c = await exportar(GID_MAP[k]);
     if (c) return c;
   }
   if (MESES.indexOf(k) === -1) return null;
+
+  const gid = gidPeloNome(await descobrirAbas(), k);
+  if (gid) {
+    const c = await exportar(gid);
+    if (c) return c;
+  }
+
   const nomes = k === 'MARCO' ? ['MAR%C3%87O', 'MARCO'] : [encodeURIComponent(aba), k];
   for (const n of nomes) {
     const c = await baixar('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/gviz/tq?tqx=out:csv&headers=0&sheet=' + n);
