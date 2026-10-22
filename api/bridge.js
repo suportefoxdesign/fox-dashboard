@@ -80,11 +80,18 @@ async function descobrirAbas() {
     const r = await fetch('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/htmlview');
     if (r.ok) {
       const html = await r.text();
-      const re = /id="sheet-button-(\d+)"[^>]*>\s*(?:<a[^>]*>)?([^<]+)/g;
+      // o htmlview lista as abas em items.push({name: "OUTUBRO", ... gid: "97982590"})
+      const re = /name:\s*"([^"]+)"[^}]*?gid:\s*"(\d+)"/g;
       let m;
       while ((m = re.exec(html)) !== null) {
+        const nome = normalizar(m[1]);
+        if (nome) mapa[nome] = m[2];
+      }
+      // formato antigo, por garantia
+      const re2 = /id="sheet-button-(\d+)"[^>]*>\s*(?:<a[^>]*>)?([^<]+)/g;
+      while ((m = re2.exec(html)) !== null) {
         const nome = normalizar(m[2]);
-        if (nome) mapa[nome] = m[1];
+        if (nome && !mapa[nome]) mapa[nome] = m[1];
       }
     }
   } catch (e) { /* sem descoberta, segue nos gids/nomes fixos */ }
