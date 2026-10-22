@@ -8,7 +8,8 @@ const TZ_PLANILHA = 'America/Los_Angeles';
 
 const GID_MAP = {
   JANEIRO: 1930056113, FEVEREIRO: 139141619, MARCO: 394024566, ABRIL: 1775302632,
-  MAIO: 1874931146, JUNHO: 1904737424, JULHO: 1460532624, AGOSTO: 1775966737
+  MAIO: 1874931146, JUNHO: 1904737424, JULHO: 1460532624, AGOSTO: 1775966737,
+  SETEMBRO: 323861705, OUTUBRO: 97982590
 };
 const MESES = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO',
                'JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
@@ -131,11 +132,18 @@ async function descobrirAbas() {
     const r = await fetch('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/htmlview');
     if (r.ok) {
       const html = await r.text();
-      const re = /id="sheet-button-(\d+)"[^>]*>\s*(?:<a[^>]*>)?([^<]+)/g;
+      // o htmlview lista as abas em items.push({name: "OUTUBRO", ... gid: "97982590"})
+      const re = /name:\s*"([^"]+)"[^}]*?gid:\s*"(\d+)"/g;
       let m;
       while ((m = re.exec(html)) !== null) {
+        const nome = normalizar(m[1]);
+        if (nome) mapa[nome] = m[2];
+      }
+      // formato antigo, por garantia
+      const re2 = /id="sheet-button-(\d+)"[^>]*>\s*(?:<a[^>]*>)?([^<]+)/g;
+      while ((m = re2.exec(html)) !== null) {
         const nome = normalizar(m[2]);
-        if (nome) mapa[nome] = m[1];
+        if (nome && !mapa[nome]) mapa[nome] = m[1];
       }
     }
   } catch (e) { /* sem descoberta, cai no gviz */ }
